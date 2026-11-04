@@ -23,18 +23,16 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
-          version: '6.8.0'                 # 可改成 6.12.* 或你实际使用的版本
+          version: '6.12.0'                 # 可改成 6.12.* 或你实际使用的版本
           host: windows
           target: desktop
           arch: win64_msvc2022_64
-          modules: >
-            qtquick
-            qtquickcontrols2
-            qtshadertools
           cache: true
 
       - name: Setup MSVC Environment
         uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
 
       - name: Install Ninja
         run: choco install ninja -y
@@ -48,9 +46,14 @@ jobs:
       - name: Build
         run: cmake --build build --parallel
 
+      - name: Test
+        run: |
+          $env:PATH = "$env:QT_ROOT_DIR\bin;$env:PATH"
+          ctest --test-dir build --output-on-failure
+
       - name: Install / Deploy
         run: |
-          cmake --install build --prefix install
+          cmake --install build --prefix "$env:GITHUB_WORKSPACE\install"
 
       # 如果上面的官方 deploy 脚本效果不理想，可以改用下面这行（二选一）
       # - name: Deploy with windeployqt
