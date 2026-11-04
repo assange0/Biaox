@@ -1,7 +1,8 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-import QtQuick.Controls.Material
 
 import Biaox
 
@@ -15,18 +16,30 @@ ApplicationWindow {
     visible: true
     title: currentPageTitle.length > 0 ? qsTr("Biaox - %1").arg(currentPageTitle) : qsTr("Biaox")
 
-    Material.theme: Material.Dark
-    Material.accent: "#ff9900"
-    Material.primary: "#121212"
-    // Material.foreground: "#f5f5f5"
-    // Material.background: "#1b1b1b"
-    font.pixelSize: 15
+    color: Theme.canvas
+    font.pixelSize: Theme.fontBody
 
-    readonly property string currentPageTitle: stackView.depth > 1 && stackView.currentItem ? stackView.currentItem.title : ""
+    // Keep Basic-style popups that are not wrapped by App* components (most
+    // notably the text-field context menu) on the dark palette as well.
+    palette.window: Theme.canvas
+    palette.windowText: Theme.textPrimary
+    palette.base: Theme.input
+    palette.alternateBase: Theme.surfaceAlt
+    palette.text: Theme.textPrimary
+    palette.button: Theme.surfaceAlt
+    palette.buttonText: Theme.textPrimary
+    palette.highlight: Theme.brand
+    palette.highlightedText: Theme.brandForeground
+    palette.placeholderText: Theme.textMuted
+    palette.mid: Theme.borderStrong
+    palette.dark: Theme.border
+
+    readonly property BiaoxPage currentPage: stackView.currentItem as BiaoxPage
+    readonly property string currentPageTitle: stackView.depth > 1 && currentPage ? currentPage.title : ""
 
     // Do not let the global Back shortcut navigate away while a drawer, menu
     // or dialog is open; those popups handle Escape themselves.
-    readonly property bool modalOpen: drawer.opened || optionsMenu.opened || aboutDialog.opened || (stackView.depth > 1 && stackView.currentItem && stackView.currentItem.dialogOpen)
+    readonly property bool modalOpen: drawer.opened || optionsMenu.opened || aboutDialog.opened || (stackView.depth > 1 && currentPage && currentPage.dialogOpen)
 
     Shortcut {
         sequences: ["Esc", "Back"]
@@ -37,10 +50,15 @@ ApplicationWindow {
         }
     }
 
-    Action {
-        id: navigateBackAction
-        icon.name: stackView.depth > 1 ? "back" : "drawer"
-        onTriggered: {
+    header: AppHeader {
+        id: appHeader
+        brandMode: stackView.depth === 1
+        title: window.currentPageTitle
+        backIconName: stackView.depth > 1 ? "back" : "drawer"
+        backAccessibleName: stackView.depth > 1 ? qsTr("返回") : qsTr("打开工具箱菜单")
+        menuAccessibleName: qsTr("更多选项")
+
+        onBackClicked: {
             if (stackView.depth > 1) {
                 stackView.pop();
                 listView.currentIndex = -1;
@@ -48,88 +66,99 @@ ApplicationWindow {
                 drawer.open();
             }
         }
+
+        onMenuClicked: optionsMenu.open()
     }
 
-    header: ToolBar {
-        RowLayout {
-            anchors.fill: parent
-            spacing: 8
+    AppMenu {
+        id: optionsMenu
+        x: window.width - width - Theme.spaceMd
+        // ApplicationWindow's popup coordinates start below the header, so this
+        // places the menu directly under the header's menu button.
+        y: Theme.spaceXs
 
-            ToolButton {
-                action: navigateBackAction
-                icon.color: "white"
-                Accessible.name: stackView.depth > 1 ? qsTr("返回") : qsTr("打开工具箱菜单")
-            }
+        Action {
+            text: qsTr("关于 Biaox")
+            onTriggered: aboutDialog.open()
+        }
 
-            Label {
-                text: window.currentPageTitle.length > 0 ? window.currentPageTitle : qsTr("Biaox")
-                font.pixelSize: 26
-                elide: Label.ElideRight
-                horizontalAlignment: Qt.AlignHCenter
-                verticalAlignment: Qt.AlignVCenter
-                Layout.fillWidth: true
-            }
-
-            ToolButton {
-                icon.name: "menu"
-                icon.color: "white"
-                Accessible.name: qsTr("更多选项")
-
-                Menu {
-                    id: optionsMenu
-                    x: parent.width - width
-                    transformOrigin: Menu.TopRight
-
-                    Action {
-                        text: qsTr("关于 Biaox")
-                        onTriggered: aboutDialog.open()
-                    }
-                    Action {
-                        text: qsTr("退出")
-                        onTriggered: Qt.quit()
-                    }
-                }
-
-                onClicked: optionsMenu.open()
-            }
+        Action {
+            text: qsTr("退出")
+            onTriggered: Qt.quit()
         }
     }
 
     Drawer {
         id: drawer
-        width: Math.min(320, window.width * 0.8)
+        width: Math.min(Theme.drawerWidth, window.width * 0.8)
         height: window.height
         edge: Qt.LeftEdge
         modal: true
         interactive: stackView.depth === 1
+        padding: 0
+
+        background: Rectangle {
+            color: Theme.drawer
+
+            Rectangle {
+                anchors.top: parent.top
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                width: 1
+                color: Theme.headerBorder
+            }
+        }
+
+        Overlay.modal: Rectangle {
+            color: Theme.overlay
+        }
 
         ColumnLayout {
             anchors.fill: parent
             spacing: 0
 
-            Label {
+            RowLayout {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
-                Layout.leftMargin: 16
-                text: qsTr("Biaox")
-                font.pixelSize: 26
-                font.bold: true
-                elide: Label.ElideRight
-            }
+                Layout.margins: Theme.spaceXl
+                spacing: Theme.spaceMd
 
-            Label {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.bottomMargin: 16
-                text: qsTr("一个小工具箱")
-                font.pixelSize: 16
-                opacity: 0.75
+                Image {
+                    Layout.alignment: Qt.AlignVCenter
+                    source: "qrc:/icons/biaox/app.png"
+                    sourceSize.width: 32
+                    sourceSize.height: 32
+                    fillMode: Image.PreserveAspectFit
+                    smooth: true
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 0
+
+                    Label {
+                        Layout.fillWidth: true
+                        text: "Biaox"
+                        color: Theme.brand
+                        font.pixelSize: Theme.fontBrand
+                        font.weight: Theme.fontWeightBold
+                        font.letterSpacing: 0.5
+                        elide: Label.ElideRight
+                    }
+
+                    Label {
+                        Layout.fillWidth: true
+                        text: qsTr("一个小工具箱")
+                        color: Theme.textSecondary
+                        font.pixelSize: Theme.fontCaption
+                        elide: Label.ElideRight
+                    }
+                }
             }
 
             Rectangle {
                 Layout.fillWidth: true
                 implicitHeight: 1
-                color: Qt.rgba(1, 1, 1, 0.12)
+                color: Theme.border
             }
 
             ListView {
@@ -140,12 +169,10 @@ ApplicationWindow {
                 focus: true
                 currentIndex: -1
                 model: ToolCatalog.tools
+                boundsBehavior: Flickable.StopAtBounds
 
-                delegate: ItemDelegate {
-                    id: toolDelegate
-                    width: ListView.view.width
-                    highlighted: ListView.isCurrentItem
-                    opacity: isPlaceholder ? 0.72 : 1.0
+                delegate: AppNavItem {
+                    id: navItem
 
                     required property int index
                     required property string title
@@ -153,59 +180,37 @@ ApplicationWindow {
                     required property string source
                     required property bool isPlaceholder
 
-                    readonly property url pageUrl: Qt.resolvedUrl(source)
-
-                    contentItem: ColumnLayout {
-                        spacing: 2
-
-                        Label {
-                            Layout.fillWidth: true
-                            text: toolDelegate.title
-                            color: hovered ? "#ff9900" : "#ffffff"
-                            font.pixelSize: 20
-                            elide: Label.ElideRight
-                        }
-
-                        Label {
-                            Layout.fillWidth: true
-                            text: toolDelegate.subtitle
-                            color: hovered ? "#ff9900" : "#ffffff"
-                            font.pixelSize: 16
-                            opacity: 0.65
-                            elide: Label.ElideRight
-                        }
-                    }
-
-                    // background: Rectangle {
-                    //     anchors.fill: parent
-                    //     // opacity: enabled ? 1 : 0.3
-                    //     color: hovered ? "#525252" : "transparent"
-                    // }
+                    width: ListView.view.width
+                    headline: title
+                    description: subtitle
+                    placeholder: isPlaceholder
+                    highlighted: ListView.isCurrentItem
+                    Accessible.name: subtitle.length > 0 ? title + "，" + subtitle : title
 
                     onClicked: {
                         if (stackView.depth > 1)
                             return;
                         listView.currentIndex = index;
-                        stackView.push(pageUrl);
+                        stackView.push(Qt.resolvedUrl(source));
                         drawer.close();
                     }
                 }
 
-                ScrollIndicator.vertical: ScrollIndicator {}
+                ScrollBar.vertical: AppScrollBar { }
             }
 
             Rectangle {
                 Layout.fillWidth: true
                 implicitHeight: 1
-                color: Qt.rgba(1, 1, 1, 0.12)
+                color: Theme.border
             }
 
             Label {
                 Layout.fillWidth: true
-                Layout.margins: 16
+                Layout.margins: Theme.spaceXl
                 text: qsTr("Biaox 版本 %1").arg(Qt.application.version)
-                opacity: 0.5
-                font.pixelSize: 14
+                color: Theme.textMuted
+                font.pixelSize: Theme.fontCaption
                 elide: Label.ElideRight
             }
         }
@@ -219,48 +224,48 @@ ApplicationWindow {
         }
     }
 
-    Dialog {
+    AppDialog {
         id: aboutDialog
-        modal: true
-        focus: true
         title: qsTr("关于 Biaox")
         x: Math.round((window.width - width) / 2)
-        y: Math.round(window.height / 8)
-        width: Math.min(window.width - 40, 480)
-        contentHeight: aboutColumn.height
+        y: Math.round((window.height - height) / 2)
+        width: Math.min(window.width - 48, Theme.dialogMaxWidth)
+        confirmText: qsTr("确定")
 
-        standardButtons: Dialog.Ok
-
-        Column {
-            id: aboutColumn
-            spacing: 14
+        ColumnLayout {
+            width: aboutDialog.availableWidth
+            spacing: Theme.spaceMd
 
             Label {
-                width: aboutDialog.availableWidth
+                Layout.fillWidth: true
                 text: qsTr("Biaox %1").arg(Qt.application.version)
-                font.pixelSize: 20
-                font.bold: true
+                color: Theme.textPrimary
+                font.pixelSize: Theme.fontHero
+                font.weight: Theme.fontWeightBold
             }
 
             Label {
-                width: aboutDialog.availableWidth
+                Layout.fillWidth: true
                 text: qsTr("一个基于 Qt 6 和 Qt Quick Controls 的小工具箱。")
-                wrapMode: Label.Wrap
+                color: Theme.textPrimary
+                font.pixelSize: Theme.fontBody
+                wrapMode: Text.WordWrap
             }
 
             Label {
-                width: aboutDialog.availableWidth
+                Layout.fillWidth: true
                 text: qsTr("MobaXterm 是商业软件。本工具仅供学习研究，请通过官方渠道购买正版授权。")
-                opacity: 0.8
-                wrapMode: Label.Wrap
+                color: Theme.textSecondary
+                font.pixelSize: Theme.fontLabel
+                wrapMode: Text.WordWrap
             }
 
             Label {
-                width: aboutDialog.availableWidth
+                Layout.fillWidth: true
                 text: qsTr("部分界面结构和图标来自 Qt Quick Controls Gallery（BSD-3-Clause）。")
-                opacity: 0.6
-                font.pixelSize: 14
-                wrapMode: Label.Wrap
+                color: Theme.textMuted
+                font.pixelSize: Theme.fontCaption
+                wrapMode: Text.WordWrap
             }
         }
     }

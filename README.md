@@ -1,13 +1,15 @@
 # Biaox
 
-一个基于 **Qt 6 + Qt Quick Controls** 的小工具箱。界面参考 Qt Quick Controls Gallery：保留欢迎页、左上角菜单按钮和从左侧滑出的抽屉；每个菜单项打开一个独立的小工具页面。
+一个基于 **Qt 6 + Qt Quick Controls** 的小工具箱。界面参考 Qt Quick Controls Gallery 的结构：保留欢迎页、左上角菜单按钮和从左侧滑出的抽屉；每个菜单项打开一个独立的小工具页面。
+
+UI 使用项目内的**黑橙扁平设计系统**：Qt Quick Controls 的 **Basic Style** 作为行为基座，视觉由 `qml/Theme.qml` 和 `qml/components/` 下的 `App*` 组件统一提供，不再使用 Material Style。
 
 当前内置：
 
-- **MobaXterm 激活文件**：输入用户名和版本号，生成并保存 `Custom.mxtpro`。
+- **MobaXterm 注册机**：输入用户名和版本号，生成并保存 `Custom.mxtpro`。
 - **新功能待添加**：占位页，后续工具会插在它前面。
 
-界面使用 Material 深色主题和简体中文，目前UI的配色方案模仿的是Pornhub网站的配色，不提供运行时主题切换。
+界面使用简体中文和深色黑橙主题，配色受 Pornhub 的黑橙视觉启发，但不是其产品、商标或素材的复制。当前不提供运行时主题切换。
 
 ## 环境要求
 
@@ -42,12 +44,12 @@ ctest --test-dir Biaox/build --output-on-failure
 - `Custom.mxtpro` 的 ZIP 结构和 `Pro.key` 内容
 - 版本列表重载和自动追加新版本
 
-UI 本身通过启动应用进行手工冒烟检查。
+UI 本身通过启动应用进行手工冒烟检查；本次 UI 重构另外在 Xvfb 下用截图复核了欢迎页、抽屉、工具页、下拉框、菜单、对话框和最小窗口尺寸。
 
 ## 使用
 
 1. 启动后是欢迎页。点击左上角的菜单按钮，或点击“打开工具箱”，也可以从窗口左边缘向右滑动打开抽屉。
-2. 选择 **MobaXterm 激活文件**：
+2. 选择 **MobaXterm 注册机**：
    - 输入用户名。用户名不能包含 `#`、`|` 或控制字符。
    - 从下拉框选择版本号，或直接输入 `major.minor`，例如 `26.6`。
    - 点击“生成”，在保存对话框中选择位置。文件名默认预填为 `Custom.mxtpro`，程序会自动补全 `.mxtpro` 后缀（建议保持该文件名）。
@@ -61,7 +63,7 @@ UI 本身通过启动应用进行手工冒烟检查。
 
 ### 版本列表文件
 
-Moba 页面会自动从内置默认列表初始化 `versions.txt`。文件位置取决于平台的应用配置目录，页面底部会显示真实路径。Linux 下通常是：
+Moba 页面会自动从内置默认列表初始化 `versions.txt`。文件位置取决于平台的应用配置目录；版本号输入框下方会显示“版本列表文件”的真实路径。Linux 下通常是：
 
 ```text
 ~/.config/Biaox/versions.txt
@@ -76,7 +78,7 @@ Moba 页面会自动从内置默认列表初始化 `versions.txt`。文件位置
 27.0
 ```
 
-- 下拉框暂时设置成不可编辑，如需修改适配的MobaXterm版本号，请手动修改版本列表文件。
+- 下拉框暂时设置成不可编辑，如需修改适配的 MobaXterm 版本号，请手动修改版本列表文件。
 - 生成成功后，新版本会自动追加到文件。
 - 修改外部文件后，点击“刷新”重新加载；点击“编辑”用系统编辑器打开。
 - 设置 `MOBAXKEYGEN_CONFIG_DIR` 环境变量可以指定另一个配置目录（测试也使用这个变量隔离配置）。
@@ -91,7 +93,6 @@ Moba 页面会自动从内置默认列表初始化 `versions.txt`。文件位置
    ```qml
    import QtQuick
    import QtQuick.Layouts
-   import QtQuick.Controls
    import Biaox
 
    ScrollablePage {
@@ -100,11 +101,21 @@ Moba 页面会自动从内置默认列表初始化 `versions.txt`。文件位置
 
        ColumnLayout {
            width: parent.width
-           spacing: 16
+           spacing: Theme.spaceXl
 
-           Label {
+           AppSection {
                Layout.fillWidth: true
-               text: qsTr("这里放工具界面。")
+               title: qsTr("工具设置")
+
+               AppTextField {
+                   Layout.fillWidth: true
+                   placeholderText: qsTr("输入内容")
+               }
+
+               AppButton {
+                   text: qsTr("执行")
+                   variant: "primary"
+               }
            }
        }
    }
@@ -139,24 +150,79 @@ dialogOpen: myDialog.visible
 
 如果新工具需要 C++ 后端，可以把类加入 `src/` 和目标源码列表，在头文件里使用 `QML_ELEMENT`，QML 中通过 `import Biaox` 使用。当前 `MobaKeygen` 就是这样注册的。
 
+## UI 设计系统
+
+### 设计 token
+
+所有颜色、字号、间距和控件尺寸集中在 `qml/Theme.qml`（`pragma Singleton`）。页面和组件中不要再写颜色/字号字面量。
+
+核心色板：
+
+| Token | 值 | 用途 |
+|---|---|---|
+| `Theme.brand` | `#FF9900` | 品牌色、主按钮、focus、选中态 |
+| `Theme.brandHover` / `brandPressed` | `#FFAD33` / `#E68A00` | 主按钮状态 |
+| `Theme.canvas` / `header` | `#000000` | 窗口、顶栏、页面底色 |
+| `Theme.drawer` | `#0A0A0A` | 抽屉 |
+| `Theme.surface` / `surfaceAlt` | `#121212` / `#1A1A1A` | 弹层、对话框、hover 层 |
+| `Theme.input` | `#0F0F0F` | 输入框底色 |
+| `Theme.border` / `borderStrong` | `#2A2A2A` / `#5A5A5A` | 分隔线 / 交互描边 |
+| `Theme.textPrimary` / `textSecondary` / `textMuted` | `#FFFFFF` / `#A6A6A6` / `#8A8A8A` | 文字层级 |
+| `Theme.danger` | `#FF5C5C` | 错误状态 |
+| `Theme.overlay` | `#B3000000` | 70% 黑色遮罩 |
+
+字号阶梯：32（欢迎页标题）、24（占位页/对话框强调）、18（顶栏标题）、15（区块标题/导航标题）、14（正文/输入/按钮）、13（标签/状态）、12（路径/提示）。正文使用平台默认字体族，不硬编码字体，保证中文回退。
+
+尺寸：顶栏 56、输入/按钮 36、图标按钮 40、圆角 4、页面左右内边距 24、工具页最大内容宽 820、抽屉 300、对话框最大宽 480。
+
+### 组件
+
+| 组件 | 说明 |
+|---|---|
+| `BiaoxPage` | 所有页面的基类，统一黑底和 `dialogOpen` 约定 |
+| `ScrollablePage` | 可滚动工具页基类，内容居中、最大宽 820 |
+| `AppButton` | `variant: "primary" \| "secondary" \| "ghost"`，统一尺寸/状态/focus |
+| `AppIconButton` | 顶栏图标按钮，hover/focus 图标变橙 |
+| `AppTextField` | 36px 输入框，橙色 focus 描边，无浮动标签 |
+| `AppComboBox` | 紧凑下拉框，宽度随控件、最大高度 240、超出滚动 |
+| `AppHeader` | 56px 顶栏，支持页面标题/根页面品牌字标 |
+| `AppMenu` | 暗色菜单，40px 行高，hover 橙字 |
+| `AppDialog` | 暗色对话框，4px 圆角、1px 描边、自定义底部按钮 |
+| `AppSection` | 平面区块：15px 标题 + 1px 分隔线 + 内容 |
+| `AppNavItem` | 抽屉导航项，56px，hover/选中橙条 |
+| `AppStatus` | 状态行，`severity: "info" \| "warning" \| "error"`（错误红、警告橙） |
+| `AppScrollBar` | 6px 细滚动条，内容溢出时显示 |
+
+### 使用约定
+
+- 每个页面只放一个主操作按钮（`variant: "primary"`）；其余操作使用 `secondary`。
+- 错误用 `AppStatus` 的 `error`（红），提示/文件名警告用 `warning`（橙），普通信息用 `info`。
+- 整个 UI 只使用 **0 或 4px 圆角**；不要新增胶囊按钮、卡片阴影、水波纹、缩放弹层等 Material 语言。应用图标本身是品牌资产，是唯一例外。
+- 不再使用 Material Style。不要在页面中 `import QtQuick.Controls.Material`，也不要写 `Material.*` 附加属性。
+- 平面区块用 `AppSection` 的标题 + 分隔线分组，不要把 Material `Frame` 当成卡片使用。
+- 系统 `FileDialog` 和 OS 窗口标题栏/边框由平台绘制，是仅有的非自绘表面：桌面环境通常跟随系统主题；在无桌面/裸 X 环境下文件对话框可能回退为浅色 Qt 对话框，这是预期例外。
+- 目前只提供深色主题，没有运行时主题切换或浅色主题。
+
 ## 项目结构
 
 ```text
 Biaox/
 ├── CMakeLists.txt
 ├── src/
-│   ├── main.cpp
+│   ├── main.cpp              # Basic style + 启动暗色 palette
 │   └── moba/                 # 从 mobaXkeygen 复制的后端
 ├── qml/
-│   ├── Main.qml              # header + Drawer + StackView
+│   ├── Main.qml              # header + Drawer + StackView + 菜单/关于
+│   ├── Theme.qml             # 设计 token（Singleton）
 │   ├── ToolCatalog.qml       # 工具列表（Singleton）
 │   ├── WelcomePage.qml
 │   ├── ScrollablePage.qml
+│   ├── components/           # BiaoxPage + App* 统一控件
 │   └── pages/
 │       ├── MobaXtermKeygenPage.qml
 │       └── ComingSoonPage.qml
 ├── resources/versions.txt
-├── icons/biaox/              # 菜单/返回图标主题
+├── icons/biaox/              # 菜单/返回/更多图标主题
 └── tests/
 ```
 
@@ -164,9 +230,10 @@ Biaox/
 
 - 所有 QML 页面和 C++ `MobaKeygen` 注册在同一个 QML 模块 `Biaox` 中，入口使用 `engine.loadFromModule("Biaox", "Main")`。
 - `QZipWriter` / `QZipReader` 是 QtCore 私有 API。当前 Qt 6.12 可用；如果以后更换 Qt 版本导致私有头变化，只需调整 `src/moba/mxtprowriter.cpp` 和测试中的读取部分。
-- 深色主题下菜单/返回图标为黑色 PNG，通过 `icon.color: "white"` 着色。
+- `main.cpp` 明确设置为 Qt Quick Controls 的 **Basic** style，并设置启动暗色 palette；UI 的颜色/结构由 `Theme.qml` 和 `App*` 组件提供。
+- 菜单/返回/更多图标仍是黑色 PNG，通过 `icon.color` 绑定到 `Theme`：默认白色，hover/focus 橙色。应用图标 `qrc:/icons/biaox/app.png` 同时用于欢迎页和抽屉。
 - 抽屉只在欢迎页可交互滑出；进入工具页后通过左上角返回按钮回到欢迎页，与 Gallery 的默认行为一致。
 - 当前没有实现运行时样式切换、深浅色切换或横向固定抽屉。
 - 主要在 Linux 上构建验证；Windows / macOS 理论上可构建，但保存对话框和打开文件夹的行为可能因平台而异。
 - 部分界面结构和菜单/返回图标来自 Qt Quick Controls Gallery（BSD-3-Clause，版权归 The Qt Company Ltd.），复制文件保留了原版权头；Moba keygen 后端来自同级的 `mobaXkeygen` 项目。
-- UI配色想模仿Pornhub的黄黑设计，但是控件使用了Qt Quick Controls的Material Style，这可能限制了自定义控件的风格。
+- UI 的黑橙扁平风格受 Pornhub 配色启发，但没有使用其 logo、字体、图片或商标，也不代表与其有任何关联。

@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-import QtQuick.Controls.Material
 import QtQuick.Dialogs
 
 import Biaox
@@ -9,7 +8,7 @@ import Biaox
 ScrollablePage {
     id: page
 
-    title: qsTr("MobaXterm注册机")
+    title: qsTr("MobaXterm 注册机")
 
     dialogOpen: saveDialog.visible
 
@@ -24,13 +23,18 @@ ScrollablePage {
     }
 
     function showError(message) {
-        statusLabel.error = true;
-        statusLabel.text = message;
+        status.severity = "error";
+        status.text = message;
     }
 
     function showInfo(message) {
-        statusLabel.error = false;
-        statusLabel.text = message;
+        status.severity = "info";
+        status.text = message;
+    }
+
+    function showWarning(message) {
+        status.severity = "warning";
+        status.text = message;
     }
 
     function reloadVersions() {
@@ -50,150 +54,150 @@ ScrollablePage {
 
     ColumnLayout {
         width: parent.width
-        spacing: 16
+        spacing: Theme.spaceXl
 
-        // Label {
-        //     Layout.fillWidth: true
-        //     wrapMode: Label.Wrap
-        //     text: qsTr("生成 MobaXterm Professional 的 Custom.mxtpro 激活文件。")
-        // }
-
-        Frame {
+        Label {
             Layout.fillWidth: true
-
-            ColumnLayout {
-                width: parent.width
-                spacing: 14
-
-                Label {
-                    text: qsTr("许可证信息")
-                    font.pixelSize: 20
-                    font.bold: true
-                }
-
-                GridLayout {
-                    Layout.fillWidth: true
-                    columns: 2
-                    columnSpacing: 12
-                    rowSpacing: 10
-
-                    Label {
-                        text: qsTr("版本号")
-                    }
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: 8
-
-                        ComboBox {
-                            id: versionCombo
-                            Layout.fillWidth: true
-                            editable: false
-                            model: keygen.versionList
-                            Accessible.name: qsTr("MobaXterm 版本号")
-                            onActivated: keygen.version = currentText
-                            onAccepted: keygen.version = currentText
-
-                            Component.onCompleted: {
-                                const index = find(keygen.version);
-                                if (index >= 0)
-                                    currentIndex = index;
-                                else
-                                    editText = keygen.version;
-                            }
-                        }
-
-                        ToolButton {
-                            text: qsTr("刷新")
-                            ToolTip.visible: hovered
-                            ToolTip.text: qsTr("重新加载版本列表文件")
-                            onClicked: page.reloadVersions()
-                        }
-
-                        ToolButton {
-                            text: qsTr("编辑")
-                            ToolTip.visible: hovered
-                            ToolTip.text: qsTr("编辑版本列表文件：%1").arg(keygen.versionsFilePath)
-                            onClicked: keygen.openVersionsFile()
-                        }
-                    }
-                    Label {
-                        text: qsTr("用户名")
-                    }
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: 8
-
-                        TextField {
-                            id: nameField
-                            Layout.preferredWidth: versionCombo.width
-                            placeholderText: qsTr("请输入用户名")
-                            Accessible.name: qsTr("用户名")
-                            onTextEdited: keygen.userName = text
-                            onAccepted: page.generate()
-                        }
-
-                        Button {
-                            text: qsTr("生成")
-                            Material.background: "#ff9900"
-                            Material.foreground: "#171717"
-                            onClicked: page.generate()
-                        }
-                    }
-                }
-            }
+            text: qsTr("生成 MobaXterm Professional 的 Custom.mxtpro 激活文件。")
+            color: Theme.textSecondary
+            font.pixelSize: Theme.fontBody
+            wrapMode: Text.WordWrap
         }
 
-        Frame {
+        AppSection {
             Layout.fillWidth: true
+            title: qsTr("许可证信息")
 
-            ColumnLayout {
-                width: parent.width
-                spacing: 14
+            GridLayout {
+                Layout.fillWidth: true
+                columns: 2
+                columnSpacing: Theme.spaceLg
+                rowSpacing: Theme.spaceLg
 
                 Label {
-                    text: qsTr("输出文件")
-                    font.pixelSize: 20
-                    font.bold: true
+                    Layout.alignment: Qt.AlignVCenter
+                    text: qsTr("版本号")
+                    color: Theme.textSecondary
+                    font.pixelSize: Theme.fontLabel
+                    font.weight: Theme.fontWeightMedium
                 }
 
                 RowLayout {
                     Layout.fillWidth: true
-                    spacing: 8
+                    spacing: Theme.spaceSm
 
-                    TextField {
-                        id: fileField
-                        Layout.fillWidth: true
-                        readOnly: true
-                        placeholderText: qsTr("生成并保存后显示路径")
-                        text: keygen.lastSavedPath
+                    AppComboBox {
+                        id: versionCombo
+                        Layout.preferredWidth: 220
+                        editable: false
+                        model: keygen.versionList
+                        Accessible.name: qsTr("MobaXterm 版本号")
+                        onActivated: keygen.version = currentText
+                        onAccepted: keygen.version = currentText
+
+                        Component.onCompleted: {
+                            const index = find(keygen.version);
+                            if (index >= 0)
+                                currentIndex = index;
+                            else
+                                editText = keygen.version;
+                        }
                     }
 
-                    Button {
-                        text: qsTr("打开文件夹")
-                        enabled: keygen.lastSavedPath.length > 0
-                        onClicked: keygen.openContainingFolder()
+                    AppButton {
+                        text: qsTr("刷新")
+                        variant: "secondary"
+                        onClicked: page.reloadVersions()
+                    }
+
+                    AppButton {
+                        text: qsTr("编辑")
+                        variant: "secondary"
+                        onClicked: keygen.openVersionsFile()
+                    }
+
+                    Item {
+                        Layout.fillWidth: true
                     }
                 }
 
                 Label {
-                    id: statusLabel
-                    Layout.fillWidth: true
-                    wrapMode: Text.WordWrap
-                    text: qsTr("就绪")
-                    color: error ? "#ff9900" : Material.foreground
-                    property bool error: false
+                    Layout.alignment: Qt.AlignVCenter
+                    text: qsTr("用户名")
+                    color: Theme.textSecondary
+                    font.pixelSize: Theme.fontLabel
+                    font.weight: Theme.fontWeightMedium
                 }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.spaceSm
+
+                    AppTextField {
+                        id: nameField
+                        Layout.fillWidth: true
+                        placeholderText: qsTr("请输入用户名")
+                        Accessible.name: qsTr("用户名")
+                        onTextEdited: keygen.userName = text
+                        onAccepted: page.generate()
+                    }
+
+                    AppButton {
+                        Layout.preferredWidth: 88
+                        text: qsTr("生成")
+                        variant: "primary"
+                        onClicked: page.generate()
+                    }
+                }
+            }
+
+            Label {
+                Layout.fillWidth: true
+                text: qsTr("版本列表文件：%1").arg(keygen.versionsFilePath)
+                color: Theme.textMuted
+                font.pixelSize: Theme.fontCaption
+                elide: Text.ElideMiddle
+            }
+        }
+
+        AppSection {
+            Layout.fillWidth: true
+            title: qsTr("输出文件")
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Theme.spaceSm
+
+                AppTextField {
+                    id: fileField
+                    Layout.fillWidth: true
+                    readOnly: true
+                    placeholderText: qsTr("生成并保存后显示路径")
+                    text: keygen.lastSavedPath
+                }
+
+                AppButton {
+                    text: qsTr("打开文件夹")
+                    variant: "secondary"
+                    enabled: keygen.lastSavedPath.length > 0
+                    onClicked: keygen.openContainingFolder()
+                }
+            }
+
+            AppStatus {
+                id: status
+                Layout.fillWidth: true
+                text: qsTr("就绪")
+                severity: "info"
             }
         }
 
         Label {
             Layout.fillWidth: true
-            wrapMode: Label.Wrap
-            font.pixelSize: 14
-            opacity: 0.72
             text: qsTr("将生成的 Custom.mxtpro 放到 MobaXterm 安装目录，然后重启 MobaXterm。")
+            color: Theme.textMuted
+            font.pixelSize: Theme.fontCaption
+            wrapMode: Text.WordWrap
         }
     }
 
@@ -219,8 +223,9 @@ ScrollablePage {
         function onLicenseSaved(path) {
             let message = qsTr("已保存: %1").arg(path);
             if (!/[\\/]Custom\.mxtpro$/i.test(path))
-                message += "\n" + qsTr("提示：文件名不是 Custom.mxtpro，MobaXterm 可能无法识别。");
-            page.showInfo(message);
+                page.showWarning(message + "\n" + qsTr("提示：文件名不是 Custom.mxtpro，MobaXterm 可能无法识别。"));
+            else
+                page.showInfo(message);
         }
 
         function onVersionListChanged() {

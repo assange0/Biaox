@@ -5,7 +5,7 @@ import QtQuick
 QtObject {
     readonly property ListModel tools: ListModel {
         ListElement {
-            title: qsTr("MobaXterm注册机")
+            title: qsTr("MobaXterm 注册机")
             subtitle: qsTr("生成 Custom.mxtpro")
             source: "pages/MobaXtermKeygenPage.qml"
             isPlaceholder: false

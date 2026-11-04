@@ -47,23 +47,39 @@ if(MSVC)
     target_compile_options(biaox PRIVATE /utf-8)
 endif()
 
-# ToolCatalog is a QML singleton.
-set_source_files_properties(qml/ToolCatalog.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
+# ToolCatalog and Theme are QML singletons.
+set_source_files_properties(
+    qml/ToolCatalog.qml
+    qml/Theme.qml
+    PROPERTIES QT_QML_SINGLETON_TYPE TRUE
+)
 
 qt_add_qml_module(biaox
     URI Biaox
     VERSION 1.0
     QML_FILES
         qml/Main.qml
+        qml/Theme.qml
         qml/ToolCatalog.qml
         qml/WelcomePage.qml
         qml/ScrollablePage.qml
+        qml/components/AppButton.qml
+        qml/components/AppComboBox.qml
+        qml/components/AppDialog.qml
+        qml/components/AppHeader.qml
+        qml/components/AppIconButton.qml
+        qml/components/AppMenu.qml
+        qml/components/AppNavItem.qml
+        qml/components/AppScrollBar.qml
+        qml/components/AppSection.qml
+        qml/components/AppStatus.qml
+        qml/components/AppTextField.qml
+        qml/components/BiaoxPage.qml
         qml/pages/MobaXtermKeygenPage.qml
         qml/pages/ComingSoonPage.qml
     DEPENDENCIES
         QtQuick
         QtQuick.Controls
-        QtQuick.Controls.Material
         QtQuick.Dialogs
         QtQuick.Layouts
 )

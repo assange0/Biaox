@@ -4,13 +4,13 @@
 import QtQuick
 import QtQuick.Controls
 
-Page {
+import Biaox
+
+BiaoxPage {
     id: page
 
-    // Tool pages that open their own dialog can bind this to the dialog's
-    // visibility so the application's Back shortcut stays disabled.
-    property bool dialogOpen: false
-
+    // Tool pages that open their own dialog can bind the inherited dialogOpen
+    // property to the dialog's visibility so the Back shortcut stays disabled.
     // contentData (rather than contentItem) keeps non-visual objects such as
     // MobaKeygen, FileDialog and Connections valid page content too.
     default property alias content: pane.contentData
@@ -19,13 +19,19 @@ Page {
         anchors.fill: parent
         contentHeight: pane.implicitHeight
         flickableDirection: Flickable.AutoFlickIfNeeded
+        boundsBehavior: Flickable.StopAtBounds
 
         Pane {
             id: pane
-            width: parent.width
-            padding: 20
+            width: Math.min(parent.width - Theme.pagePadding * 2, Theme.pageMaxWidth)
+            anchors.horizontalCenter: parent.horizontalCenter
+            topPadding: Theme.pagePadding
+            bottomPadding: Theme.pagePadding
+            leftPadding: 0
+            rightPadding: 0
+            background: null
         }
 
-        ScrollIndicator.vertical: ScrollIndicator { }
+        ScrollBar.vertical: AppScrollBar { }
     }
 }
