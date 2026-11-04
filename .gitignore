@@ -1,0 +1,87 @@
+# ========================
+# C++ 编译产物
+# ========================
+*.slo
+*.lo
+*.o
+*.a
+*.la
+*.lai
+*.so
+*.so.*
+*.dll
+*.dylib
+*.lib
+*.exp
+
+# ========================
+# Qt 生成文件
+# ========================
+object_script.*.Release
+object_script.*.Debug
+*_plugin_import.cpp
+/.qmake.cache
+/.qmake.stash
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.moc
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+*.qmlc
+*.jsc
+*.qm
+*.prl
+*.qmlls.ini
+*_qmlcache.qrc
+
+# ========================
+# 构建目录（最重要！）
+# ========================
+build/
+build-*/
+*-build-*/
+debug/
+release/
+out/
+cmake-build-*/
+.cmake/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CMakeUserPresets.json
+CMakeLists.txt.user*
+*.cmake
+
+# ========================
+# Qt Creator / IDE
+# ========================
+*.autosave
+*.qmlproject.user
+*.qmlproject.user.*
+*creator.user*
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+
+# ========================
+# 其他常见忽略
+# ========================
+*.log
+*.tmp
+*.bak
+core
+core.*
+*.app          # macOS 应用包（如果不想提交可保留）
+*.exe
+*.dSYM/
+.qtc_clangd/
+.cache/
