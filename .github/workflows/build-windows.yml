@@ -85,6 +85,7 @@ jobs:
         with:
           name: Biaox-Windows-x64
           path: ${{ env.ZIP_NAME }}
+          archive: false
           if-no-files-found: error
 
       # ---------- 只有打了 tag 才创建 GitHub Release ----------

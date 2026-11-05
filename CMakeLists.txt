@@ -4,7 +4,7 @@ project(Biaox LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 6.8 REQUIRED COMPONENTS
+find_package(Qt6 6.10 REQUIRED COMPONENTS
     Core
     CorePrivate
     Gui
@@ -14,7 +14,10 @@ find_package(Qt6 6.8 REQUIRED COMPONENTS
     QuickDialogs2
 )
 
-qt_standard_project_setup(REQUIRES 6.8)
+qt_standard_project_setup(REQUIRES 6.10)
+
+# Release 构建优化
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
 
 qt_add_executable(biaox WIN32 MACOSX_BUNDLE
     src/main.cpp
@@ -128,6 +131,12 @@ qt_generate_deploy_qml_app_script(
     OUTPUT_SCRIPT deploy_script
     NO_UNSUPPORTED_PLATFORM_ERROR
     DEPLOY_USER_QML_MODULES_ON_UNSUPPORTED_PLATFORM
+
+    # 不部署 Qt 翻译文件
+    NO_TRANSLATIONS
+
+    # 排除 QML 调试工具插件
+    EXCLUDE_PLUGIN_TYPES qmltooling
 )
 install(SCRIPT ${deploy_script})
 
