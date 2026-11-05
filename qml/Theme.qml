@@ -30,6 +30,7 @@ QtObject {
 
     // Semantic / state
     readonly property color danger: "#FF5C5C"
+    readonly property color success: "#22C55E"
     readonly property color hoverOverlay: "#14FFFFFF"
     readonly property color selectedOverlay: "#1FFF9900"
     readonly property color overlay: "#B3000000"
@@ -40,10 +41,10 @@ QtObject {
     readonly property int fontDisplay: 32
     readonly property int fontHero: 24
     readonly property int fontHeader: 18
-    readonly property int fontSection: 15
-    readonly property int fontBody: 14
-    readonly property int fontLabel: 13
-    readonly property int fontCaption: 12
+    readonly property int fontSection: 16
+    readonly property int fontBody: 15
+    readonly property int fontLabel: 14
+    readonly property int fontCaption: 13
     readonly property int fontBrand: 20
     readonly property int fontWeightMedium: Font.Medium
     readonly property int fontWeightDemiBold: Font.DemiBold

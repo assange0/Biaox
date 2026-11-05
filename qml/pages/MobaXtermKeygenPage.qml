@@ -37,6 +37,11 @@ ScrollablePage {
         status.text = message;
     }
 
+    function showSuccess(message) {
+        status.severity = "success";
+        status.text = message;
+    }
+
     function reloadVersions() {
         const typed = versionCombo.currentText;
         keygen.reloadVersions();
@@ -225,7 +230,7 @@ ScrollablePage {
             if (!/[\\/]Custom\.mxtpro$/i.test(path))
                 page.showWarning(message + "\n" + qsTr("提示：文件名不是 Custom.mxtpro，MobaXterm 可能无法识别。"));
             else
-                page.showInfo(message);
+                page.showSuccess(message);
         }
 
         function onVersionListChanged() {

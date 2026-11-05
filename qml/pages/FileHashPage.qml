@@ -310,7 +310,7 @@ ScrollablePage {
                         Label {
                             text: "MD5"
                             color: hasher.matchedAlgorithm === "MD5"
-                                ? Theme.brand
+                                ? Theme.success
                                 : Theme.textSecondary
                             font.pixelSize: Theme.fontLabel
                             font.weight: Theme.fontWeightMedium
@@ -319,7 +319,7 @@ ScrollablePage {
                         Label {
                             visible: hasher.matchedAlgorithm === "MD5"
                             text: qsTr("匹配")
-                            color: Theme.brand
+                            color: Theme.success
                             font.pixelSize: Theme.fontCaption
                             font.weight: Theme.fontWeightMedium
                         }
@@ -359,7 +359,7 @@ ScrollablePage {
                         Label {
                             text: "SHA-1"
                             color: hasher.matchedAlgorithm === "SHA-1"
-                                ? Theme.brand
+                                ? Theme.success
                                 : Theme.textSecondary
                             font.pixelSize: Theme.fontLabel
                             font.weight: Theme.fontWeightMedium
@@ -368,7 +368,7 @@ ScrollablePage {
                         Label {
                             visible: hasher.matchedAlgorithm === "SHA-1"
                             text: qsTr("匹配")
-                            color: Theme.brand
+                            color: Theme.success
                             font.pixelSize: Theme.fontCaption
                             font.weight: Theme.fontWeightMedium
                         }
@@ -408,7 +408,7 @@ ScrollablePage {
                         Label {
                             text: "SHA-256"
                             color: hasher.matchedAlgorithm === "SHA-256"
-                                ? Theme.brand
+                                ? Theme.success
                                 : Theme.textSecondary
                             font.pixelSize: Theme.fontLabel
                             font.weight: Theme.fontWeightMedium
@@ -417,7 +417,7 @@ ScrollablePage {
                         Label {
                             visible: hasher.matchedAlgorithm === "SHA-256"
                             text: qsTr("匹配")
-                            color: Theme.brand
+                            color: Theme.success
                             font.pixelSize: Theme.fontCaption
                             font.weight: Theme.fontWeightMedium
                         }
