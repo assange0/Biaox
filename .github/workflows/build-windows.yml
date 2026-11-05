@@ -29,10 +29,10 @@ jobs:
           arch: win64_msvc2022_64
           cache: true
 
-      # - name: Setup MSVC Environment
-      #   uses: ilammy/msvc-dev-cmd@v1
-      #   with:
-      #     arch: x64
+      - name: Setup MSVC Environment
+        uses: TheMrMilchmann/setup-msvc-dev@v4
+        with:
+          arch: x64
 
       - name: Install Ninja
         run: choco install ninja -y
