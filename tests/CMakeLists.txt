@@ -1,4 +1,4 @@
-find_package(Qt6 REQUIRED COMPONENTS Test)
+find_package(Qt6 REQUIRED COMPONENTS Test Concurrent)
 
 qt_add_executable(tst_mobakeygen
     tst_mobakeygen.cpp
@@ -32,3 +32,27 @@ qt_add_resources(tst_mobakeygen "tst_mobakeygen_versions"
 )
 
 add_test(NAME tst_mobakeygen COMMAND tst_mobakeygen)
+
+qt_add_executable(tst_filehasher
+    tst_filehasher.cpp
+    ${PROJECT_SOURCE_DIR}/src/hash/filehasher.cpp
+    ${PROJECT_SOURCE_DIR}/src/hash/filehasher.hpp
+)
+
+target_include_directories(tst_filehasher PRIVATE
+    ${PROJECT_SOURCE_DIR}/src/hash
+)
+
+target_link_libraries(tst_filehasher PRIVATE
+    Qt6::Core
+    Qt6::Concurrent
+    Qt6::Gui
+    Qt6::Qml
+    Qt6::Test
+)
+
+if(MSVC)
+    target_compile_options(tst_filehasher PRIVATE /utf-8)
+endif()
+
+add_test(NAME tst_filehasher COMMAND tst_filehasher)

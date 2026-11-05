@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Qt6 6.10 REQUIRED COMPONENTS
     Core
     CorePrivate
+    Concurrent
     Gui
     Qml
     Quick
@@ -21,6 +22,8 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
 
 qt_add_executable(biaox WIN32 MACOSX_BUNDLE
     src/main.cpp
+    src/hash/filehasher.cpp
+    src/hash/filehasher.hpp
     src/moba/mobakeygen.cpp
     src/moba/mobakeygen.hpp
     src/moba/mxtprowriter.cpp
@@ -33,12 +36,14 @@ set_target_properties(biaox PROPERTIES
 )
 
 target_include_directories(biaox PRIVATE
+    src/hash
     src/moba
 )
 
 target_link_libraries(biaox PRIVATE
     Qt6::Core
     Qt6::CorePrivate
+    Qt6::Concurrent
     Qt6::Gui
     Qt6::Qml
     Qt6::Quick
@@ -78,6 +83,7 @@ qt_add_qml_module(biaox
         qml/components/AppStatus.qml
         qml/components/AppTextField.qml
         qml/components/BiaoxPage.qml
+        qml/pages/FileHashPage.qml
         qml/pages/MobaXtermKeygenPage.qml
         qml/pages/ComingSoonPage.qml
     DEPENDENCIES

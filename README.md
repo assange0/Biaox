@@ -7,17 +7,19 @@ UI 使用项目内的**黑橙扁平设计系统**：Qt Quick Controls 的 **Basi
 当前内置：
 
 - **MobaXterm 注册机**：输入用户名和版本号，生成并保存 `Custom.mxtpro`。
+- **文件哈希校验**：选择或拖入单个文件，计算 MD5 / SHA-1 / SHA-256，复制结果并校验来源网站提供的哈希值。
 - **新功能待添加**：占位页，后续工具会插在它前面。
 
 界面使用简体中文和深色黑橙主题，配色受 Pornhub 的黑橙视觉启发，但不是其产品、商标或素材的复制。当前不提供运行时主题切换。
 
 ## 环境要求
 
-- Qt 6.8 或更新版本（当前在 **Qt 6.12.0** 上构建验证）
+- Qt 6.10 或更新版本（当前在 **Qt 6.12.0** 上构建验证）
 - CMake 3.21 或更新版本
 - C++17 编译器
-- Qt 模块：Core、Gui、Qml、Quick、QuickControls2、QuickDialogs2、Test（仅测试需要）
+- Qt 模块：Core、Gui、Qml、Quick、QuickControls2、QuickDialogs2、Concurrent、Test（仅测试需要）
 - `QZipWriter` 使用的 QtCore 私有头文件；CMake 通过 `Qt6::CorePrivate` 引入，配置阶段出现私有模块警告是预期行为
+- `QtConcurrent` 用于在后台线程计算文件哈希
 
 ## 构建和运行
 
@@ -37,14 +39,17 @@ cmake --build Biaox/build -j"$(nproc)"
 ctest --test-dir Biaox/build --output-on-failure
 ```
 
-测试覆盖已有的 MobaXterm keygen 后端逻辑：
+测试覆盖 MobaXterm keygen 和文件哈希后端逻辑：
 
 - ASCII 和中文用户名的已知 license 向量
 - 非法用户名、非法版本号
 - `Custom.mxtpro` 的 ZIP 结构和 `Pro.key` 内容
 - 版本列表重载和自动追加新版本
+- 空文件和 `abc` 的 MD5 / SHA-1 / SHA-256 已知向量
+- 无效文件、目录和非本地 URL 的拒绝
+- 预期哈希的常见格式解析、算法识别、匹配与不匹配
 
-UI 本身通过启动应用进行手工冒烟检查；本次 UI 重构另外在 Xvfb 下用截图复核了欢迎页、抽屉、工具页、下拉框、菜单、对话框和最小窗口尺寸。
+UI 本身通过启动应用进行手工冒烟检查；本次 UI 重构另外在 Xvfb 下用截图复核了欢迎页、抽屉、工具页、下拉框、菜单、对话框和最小窗口尺寸。文件哈希页也复核了空态、已选文件、计算完成、复制、校验通过/失败和拖拽选中。
 
 ## 使用
 
@@ -54,8 +59,14 @@ UI 本身通过启动应用进行手工冒烟检查；本次 UI 重构另外在 
    - 从下拉框选择版本号，或直接输入 `major.minor`，例如 `26.6`。
    - 点击“生成”，在保存对话框中选择位置。文件名默认预填为 `Custom.mxtpro`，程序会自动补全 `.mxtpro` 后缀（建议保持该文件名）。
    - 生成后“输出文件”中会显示保存路径，可点击“打开文件夹”。
-3. 点击左上角返回按钮，或按 `Esc` / `Back`，回到欢迎页。
-4. 最后一页“新功能待添加”用于后续扩展。
+3. 选择 **文件哈希校验**：
+   - 点击“选择文件”打开系统文件对话框，或把**单个**本地文件拖到文件面板。多文件和目录会被拒绝。
+   - 选择后点击“计算”，程序在后台计算 MD5、SHA-1、SHA-256；大文件计算期间界面保持响应，但不显示进度，也没有取消按钮。
+   - 每个哈希值可点击“复制”写入系统剪贴板。
+   - 在“校验”输入框中粘贴来源网站提供的哈希值，程序会自动识别算法并实时比对。支持大小写混用、`SHA256:` 前缀、`hash *文件名` 和分组书写；只接受一个哈希值。
+   - 计算完成后“计算”仍可再次点击，用于重新计算同一个文件。
+4. 点击左上角返回按钮，或按 `Esc` / `Back`，回到欢迎页。
+5. 最后一页“新功能待添加”用于后续扩展。
 
 将生成的 `Custom.mxtpro` 放到 MobaXterm 安装目录（与 `MobaXterm.exe` 同级），然后重启 MobaXterm。
 
@@ -190,13 +201,14 @@ dialogOpen: myDialog.visible
 | `AppDialog` | 暗色对话框，4px 圆角、1px 描边、自定义底部按钮 |
 | `AppSection` | 平面区块：15px 标题 + 1px 分隔线 + 内容 |
 | `AppNavItem` | 抽屉导航项，56px，hover/选中橙条 |
-| `AppStatus` | 状态行，`severity: "info" \| "warning" \| "error"`（错误红、警告橙） |
+| `AppStatus` | 状态行，`severity: "info" \| "success" \| "warning" \| "error"`（成功/警告橙、错误红） |
 | `AppScrollBar` | 6px 细滚动条，内容溢出时显示 |
 
 ### 使用约定
 
 - 每个页面只放一个主操作按钮（`variant: "primary"`）；其余操作使用 `secondary`。
-- 错误用 `AppStatus` 的 `error`（红），提示/文件名警告用 `warning`（橙），普通信息用 `info`。
+- 错误用 `AppStatus` 的 `error`（红），提示/文件名警告用 `warning`（橙），校验通过用 `success`（品牌橙），普通信息用 `info`。
+- 文件哈希页的拖拽面板使用 1px 描边和 4px 圆角，拖入有效文件时描边变橙，无效拖拽变红；不新增卡片或阴影。
 - 整个 UI 只使用 **0 或 4px 圆角**；不要新增胶囊按钮、卡片阴影、水波纹、缩放弹层等 Material 语言。应用图标本身是品牌资产，是唯一例外。
 - 不再使用 Material Style。不要在页面中 `import QtQuick.Controls.Material`，也不要写 `Material.*` 附加属性。
 - 平面区块用 `AppSection` 的标题 + 分隔线分组，不要把 Material `Frame` 当成卡片使用。
@@ -210,6 +222,7 @@ Biaox/
 ├── CMakeLists.txt
 ├── src/
 │   ├── main.cpp              # Basic style + 启动暗色 palette
+│   ├── hash/                 # 文件哈希后端（QtConcurrent）
 │   └── moba/                 # 从 mobaXkeygen 复制的后端
 ├── qml/
 │   ├── Main.qml              # header + Drawer + StackView + 菜单/关于
@@ -219,6 +232,7 @@ Biaox/
 │   ├── ScrollablePage.qml
 │   ├── components/           # BiaoxPage + App* 统一控件
 │   └── pages/
+│       ├── FileHashPage.qml
 │       ├── MobaXtermKeygenPage.qml
 │       └── ComingSoonPage.qml
 ├── resources/versions.txt
@@ -228,7 +242,8 @@ Biaox/
 
 ## 实现说明和限制
 
-- 所有 QML 页面和 C++ `MobaKeygen` 注册在同一个 QML 模块 `Biaox` 中，入口使用 `engine.loadFromModule("Biaox", "Main")`。
+- 所有 QML 页面和 C++ `MobaKeygen`、`FileHasher` 注册在同一个 QML 模块 `Biaox` 中，入口使用 `engine.loadFromModule("Biaox", "Main")`。
+- 文件哈希在 `QtConcurrent` 后台线程中分块计算，三种算法共用一次文件读取；页面不提供进度和取消 UI，离开页面时会取消后台任务。
 - `QZipWriter` / `QZipReader` 是 QtCore 私有 API。当前 Qt 6.12 可用；如果以后更换 Qt 版本导致私有头变化，只需调整 `src/moba/mxtprowriter.cpp` 和测试中的读取部分。
 - `main.cpp` 明确设置为 Qt Quick Controls 的 **Basic** style，并设置启动暗色 palette；UI 的颜色/结构由 `Theme.qml` 和 `App*` 组件提供。
 - 菜单/返回/更多图标仍是黑色 PNG，通过 `icon.color` 绑定到 `Theme`：默认白色，hover/focus 橙色。应用图标 `qrc:/icons/biaox/app.png` 同时用于欢迎页和抽屉。
