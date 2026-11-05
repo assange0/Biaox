@@ -213,7 +213,7 @@ ScrollablePage {
                             }
 
                             AppButton {
-                                text: qsTr("更换文件")
+                                text: qsTr("更换")
                                 variant: "secondary"
                                 enabled: !hasher.busy
                                 Accessible.name: qsTr("更换要校验的文件")
