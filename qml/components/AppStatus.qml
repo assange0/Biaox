@@ -20,7 +20,7 @@ RowLayout {
         implicitHeight: 6
         radius: 3
         color: control.severity === "error" ? Theme.danger
-            : control.severity === "warning" ? Theme.brand
+            : control.severity === "warning" ? Theme.warning
             : control.severity === "success" ? Theme.success
             : Theme.textMuted
     }
@@ -32,7 +32,7 @@ RowLayout {
         wrapMode: Text.WordWrap
         font.pixelSize: Theme.fontLabel
         color: control.severity === "error" ? Theme.danger
-            : control.severity === "warning" ? Theme.brand
+            : control.severity === "warning" ? Theme.warning
             : control.severity === "success" ? Theme.success
             : Theme.textSecondary
     }

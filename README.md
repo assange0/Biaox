@@ -2,7 +2,7 @@
 
 一个基于 **Qt 6 + Qt Quick Controls** 的小工具箱。界面参考 Qt Quick Controls Gallery 的结构：保留欢迎页、左上角菜单按钮和从左侧滑出的抽屉；每个菜单项打开一个独立的小工具页面。
 
-UI 使用项目内的**黑橙扁平设计系统**：Qt Quick Controls 的 **Basic Style** 作为行为基座，视觉由 `qml/Theme.qml` 和 `qml/components/` 下的 `App*` 组件统一提供，不再使用 Material Style。
+UI 使用项目内的**黑橙扁平设计系统**：Qt Quick Controls 的 **Basic Style** 作为行为基座，视觉由 `qml/Theme.qml` 和 `qml/components/` 下的 `App*` 组件统一提供。
 
 当前内置：
 
@@ -49,7 +49,9 @@ ctest --test-dir Biaox/build --output-on-failure
 - 无效文件、目录和非本地 URL 的拒绝
 - 预期哈希的常见格式解析、算法识别、匹配与不匹配
 
-UI 本身通过启动应用进行手工冒烟检查；本次 UI 重构另外在 Xvfb 下用截图复核了欢迎页、抽屉、工具页、下拉框、菜单、对话框和最小窗口尺寸。文件哈希页也复核了空态、已选文件、计算完成、复制、校验通过/失败和拖拽选中。
+UI 本身通过启动应用进行手工冒烟检查。
+本次 UI 重构另外在 Xvfb 下用截图复核了欢迎页、抽屉、工具页、下拉框、菜单、对话框和最小窗口尺寸。
+文件哈希页也复核了空态、已选文件、计算完成、复制、校验通过/失败和拖拽选中。
 
 ## 使用
 
@@ -72,7 +74,7 @@ UI 本身通过启动应用进行手工冒烟检查；本次 UI 重构另外在 
 
 > MobaXterm 是商业软件。本工具仅适合在拥有有效授权或纯学习研究的前提下使用，请通过官方渠道购买 Professional 版。
 
-### 版本列表文件
+### 适配的MobaXterm版本列表文件
 
 Moba 页面会自动从内置默认列表初始化 `versions.txt`。文件位置取决于平台的应用配置目录；版本号输入框下方会显示“版本列表文件”的真实路径。Linux 下通常是：
 
@@ -179,10 +181,12 @@ dialogOpen: myDialog.visible
 | `Theme.input` | `#0F0F0F` | 输入框底色 |
 | `Theme.border` / `borderStrong` | `#2A2A2A` / `#5A5A5A` | 分隔线 / 交互描边 |
 | `Theme.textPrimary` / `textSecondary` / `textMuted` | `#FFFFFF` / `#A6A6A6` / `#8A8A8A` | 文字层级 |
+| `Theme.warning` | `#FFB74D` | 警告状态 |
 | `Theme.danger` | `#FF5C5C` | 错误状态 |
+| `Theme.success` | `#69F0AE` | 成功状态 |
 | `Theme.overlay` | `#B3000000` | 70% 黑色遮罩 |
 
-字号阶梯：32（欢迎页标题）、24（占位页/对话框强调）、18（顶栏标题）、15（区块标题/导航标题）、14（正文/输入/按钮）、13（标签/状态）、12（路径/提示）。正文使用平台默认字体族，不硬编码字体，保证中文回退。
+字号阶梯：32（欢迎页标题）、24（占位页/对话框强调）、18（顶栏标题）、16（区块标题/导航标题）、15（正文/输入/按钮）、14（标签/状态）、13（路径/提示）。正文使用平台默认字体族，不硬编码字体，保证中文回退。
 
 尺寸：顶栏 56、输入/按钮 36、图标按钮 40、圆角 4、页面左右内边距 24、工具页最大内容宽 820、抽屉 300、对话框最大宽 480。
 
@@ -201,13 +205,13 @@ dialogOpen: myDialog.visible
 | `AppDialog` | 暗色对话框，4px 圆角、1px 描边、自定义底部按钮 |
 | `AppSection` | 平面区块：15px 标题 + 1px 分隔线 + 内容 |
 | `AppNavItem` | 抽屉导航项，56px，hover/选中橙条 |
-| `AppStatus` | 状态行，`severity: "info" \| "success" \| "warning" \| "error"`（成功/警告橙、错误红） |
+| `AppStatus` | 状态行，`severity: "info" \| "success" \| "warning" \| "error"`（成功绿、警告橙、错误红） |
 | `AppScrollBar` | 6px 细滚动条，内容溢出时显示 |
 
 ### 使用约定
 
 - 每个页面只放一个主操作按钮（`variant: "primary"`）；其余操作使用 `secondary`。
-- 错误用 `AppStatus` 的 `error`（红），提示/文件名警告用 `warning`（橙），校验通过用 `success`（品牌橙），普通信息用 `info`。
+- 错误用 `AppStatus` 的 `error`（红），提示/文件名警告用 `warning`（橙），校验通过用 `success`（绿），普通信息用 `info`。
 - 文件哈希页的拖拽面板使用 1px 描边和 4px 圆角，拖入有效文件时描边变橙，无效拖拽变红；不新增卡片或阴影。
 - 整个 UI 只使用 **0 或 4px 圆角**；不要新增胶囊按钮、卡片阴影、水波纹、缩放弹层等 Material 语言。应用图标本身是品牌资产，是唯一例外。
 - 不再使用 Material Style。不要在页面中 `import QtQuick.Controls.Material`，也不要写 `Material.*` 附加属性。

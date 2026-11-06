@@ -29,8 +29,9 @@ QtObject {
     readonly property color textDisabled: "#5C5C5C"
 
     // Semantic / state
+    readonly property color warning: "#FFB74D"
     readonly property color danger: "#FF5C5C"
-    readonly property color success: "#22C55E"
+    readonly property color success: "#69F0AE"
     readonly property color hoverOverlay: "#14FFFFFF"
     readonly property color selectedOverlay: "#1FFF9900"
     readonly property color overlay: "#B3000000"
