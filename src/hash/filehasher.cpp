@@ -10,9 +10,8 @@
 #include <QLocale>
 #include <QRegularExpression>
 #include <QStringList>
-#include <QtConcurrent>
+#include <QtConcurrentRun>
 
-#include <algorithm>
 
 namespace {
 
