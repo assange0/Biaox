@@ -6,7 +6,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 6.10 REQUIRED COMPONENTS
     Core
-    CorePrivate
     Concurrent
     Gui
     Qml
@@ -20,8 +19,8 @@ qt_standard_project_setup(REQUIRES 6.10)
 # Release 构建优化
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
 
-qt_add_executable(biaox WIN32 MACOSX_BUNDLE
-    src/main.cpp
+# 后端静态库：hash / moba 逻辑集中在此，主程序与测试共享同一份编译产物。
+qt_add_library(biaox_core STATIC
     src/hash/filehasher.cpp
     src/hash/filehasher.hpp
     src/moba/mobakeygen.cpp
@@ -30,31 +29,26 @@ qt_add_executable(biaox WIN32 MACOSX_BUNDLE
     src/moba/mxtprowriter.hpp
 )
 
-set_target_properties(biaox PROPERTIES
-    OUTPUT_NAME Biaox
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-)
+add_library(Biaox::Core ALIAS biaox_core)
 
-target_include_directories(biaox PRIVATE
+target_include_directories(biaox_core PUBLIC
     src/hash
     src/moba
 )
 
-target_link_libraries(biaox PRIVATE
+target_link_libraries(biaox_core PUBLIC
     Qt6::Core
-    Qt6::CorePrivate
     Qt6::Concurrent
     Qt6::Gui
     Qt6::Qml
-    Qt6::Quick
-    Qt6::QuickControls2
-    Qt6::QuickDialogs2
 )
 
 if(MSVC)
-    target_compile_options(biaox PRIVATE /utf-8)
+    target_compile_options(biaox_core PRIVATE /utf-8)
 endif()
 
+# QML 模块挂在 biaox_core 上：QML 文件与 C++ 类型（QML_ELEMENT）统一注册，
+# 应用通过链接静态库获得模块；whole-archive 保证注册目标文件不被丢弃。
 # ToolCatalog and Theme are QML singletons.
 set_source_files_properties(
     qml/ToolCatalog.qml
@@ -62,7 +56,7 @@ set_source_files_properties(
     PROPERTIES QT_QML_SINGLETON_TYPE TRUE
 )
 
-qt_add_qml_module(biaox
+qt_add_qml_module(biaox_core
     URI Biaox
     VERSION 1.0
     QML_FILES
@@ -83,6 +77,7 @@ qt_add_qml_module(biaox
         qml/components/AppStatus.qml
         qml/components/AppTextField.qml
         qml/components/BiaoxPage.qml
+        qml/components/HashRow.qml
         qml/pages/FileHashPage.qml
         qml/pages/MobaXtermKeygenPage.qml
         qml/pages/ComingSoonPage.qml
@@ -92,6 +87,36 @@ qt_add_qml_module(biaox
         QtQuick.Dialogs
         QtQuick.Layouts
 )
+
+qt_add_executable(biaox WIN32 MACOSX_BUNDLE
+    src/main.cpp
+)
+
+set_target_properties(biaox PROPERTIES
+    OUTPUT_NAME Biaox
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+)
+
+target_link_libraries(biaox PRIVATE
+    biaox_core
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Qml
+    Qt6::Quick
+    Qt6::QuickControls2
+)
+
+# QML 模块在静态库里：必须整库链接，否则 qml 类型注册目标文件会被 -ffunction-sections 丢弃
+if(MSVC)
+    target_link_options(biaox PRIVATE "/WHOLEARCHIVE:$<TARGET_FILE:biaox_core>")
+else()
+    target_link_options(biaox PRIVATE
+        "LINKER:--whole-archive,$<TARGET_FILE:biaox_core>,--no-whole-archive")
+endif()
+
+if(MSVC)
+    target_compile_options(biaox PRIVATE /utf-8)
+endif()
 
 qt_add_resources(biaox "biaox_versions"
     PREFIX "/resources"

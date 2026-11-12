@@ -43,14 +43,11 @@ ScrollablePage {
     }
 
     function reloadVersions() {
-        const typed = versionCombo.currentText;
         keygen.reloadVersions();
 
         const index = versionCombo.find(keygen.version);
         if (index >= 0)
             versionCombo.currentIndex = index;
-        else
-            versionCombo.editText = typed;
     }
 
     MobaKeygen {
@@ -87,42 +84,52 @@ ScrollablePage {
                     font.weight: Theme.fontWeightMedium
                 }
 
-                RowLayout {
+                ColumnLayout {
                     Layout.fillWidth: true
-                    spacing: Theme.spaceSm
+                    spacing: Theme.spaceXs
 
-                    AppComboBox {
-                        id: versionCombo
-                        Layout.preferredWidth: 220
-                        editable: false
-                        model: keygen.versionList
-                        Accessible.name: qsTr("MobaXterm 版本号")
-                        onActivated: keygen.version = currentText
-                        onAccepted: keygen.version = currentText
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Theme.spaceSm
 
-                        Component.onCompleted: {
-                            const index = find(keygen.version);
-                            if (index >= 0)
-                                currentIndex = index;
-                            else
-                                editText = keygen.version;
+                        AppComboBox {
+                            id: versionCombo
+                            Layout.preferredWidth: 220
+                            editable: false
+                            model: keygen.versionList
+                            Accessible.name: qsTr("MobaXterm 版本号")
+                            onActivated: keygen.version = currentText
+
+                            Component.onCompleted: {
+                                const index = find(keygen.version);
+                                if (index >= 0)
+                                    currentIndex = index;
+                            }
+                        }
+
+                        AppButton {
+                            text: qsTr("刷新")
+                            variant: "secondary"
+                            onClicked: page.reloadVersions()
+                        }
+
+                        AppButton {
+                            text: qsTr("编辑")
+                            variant: "secondary"
+                            onClicked: keygen.openVersionsFile()
+                        }
+
+                        Item {
+                            Layout.fillWidth: true
                         }
                     }
 
-                    AppButton {
-                        text: qsTr("刷新")
-                        variant: "secondary"
-                        onClicked: page.reloadVersions()
-                    }
-
-                    AppButton {
-                        text: qsTr("编辑")
-                        variant: "secondary"
-                        onClicked: keygen.openVersionsFile()
-                    }
-
-                    Item {
+                    Label {
                         Layout.fillWidth: true
+                        text: qsTr("版本列表文件：%1").arg(keygen.versionsFilePathDisplay)
+                        color: Theme.textMuted
+                        font.pixelSize: Theme.fontCaption
+                        elide: Text.ElideMiddle
                     }
                 }
 
@@ -155,14 +162,6 @@ ScrollablePage {
                     }
                 }
             }
-
-            Label {
-                Layout.fillWidth: true
-                text: qsTr("版本列表文件：%1").arg(keygen.versionsFilePath)
-                color: Theme.textMuted
-                font.pixelSize: Theme.fontCaption
-                elide: Text.ElideMiddle
-            }
         }
 
         AppSection {
@@ -192,7 +191,7 @@ ScrollablePage {
             AppStatus {
                 id: status
                 Layout.fillWidth: true
-                text: qsTr("就绪")
+                text: qsTr("尚未生成激活文件")
                 severity: "info"
             }
         }
@@ -243,8 +242,6 @@ ScrollablePage {
             const index = versionCombo.find(keygen.version);
             if (index >= 0)
                 versionCombo.currentIndex = index;
-            else if (versionCombo.currentText !== keygen.version)
-                versionCombo.editText = keygen.version;
         }
     }
 }

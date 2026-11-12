@@ -22,6 +22,7 @@ Button {
         ? (!enabled ? Theme.surfaceAlt : pressedStyle ? Theme.brandPressed : hoveredStyle ? Theme.brandHover : Theme.brand)
         : (!enabled ? "transparent" : (pressedStyle || hoveredStyle) ? Theme.hoverOverlay : "transparent")
 
+    // 禁用态保留弱描边，兼顾"不可点"信号与按钮可识别性（文字对比度见 textDisabled）
     readonly property color borderColor: !enabled ? Theme.border
         : visualFocus ? (primaryStyle ? Theme.textPrimary : Theme.brand)
         : primaryStyle ? "transparent"

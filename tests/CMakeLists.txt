@@ -1,22 +1,16 @@
-find_package(Qt6 REQUIRED COMPONENTS Test Concurrent)
+find_package(Qt6 REQUIRED COMPONENTS Test Concurrent CorePrivate)
+
+# 测试链接 biaox_core 静态库，不再重复编译后端源码。
+# CorePrivate 仅供测试用 QZipReader 作独立校验 oracle（应用本体不依赖私有 API）。
 
 qt_add_executable(tst_mobakeygen
     tst_mobakeygen.cpp
-    ${PROJECT_SOURCE_DIR}/src/moba/mobakeygen.cpp
-    ${PROJECT_SOURCE_DIR}/src/moba/mobakeygen.hpp
-    ${PROJECT_SOURCE_DIR}/src/moba/mxtprowriter.cpp
-    ${PROJECT_SOURCE_DIR}/src/moba/mxtprowriter.hpp
-)
-
-target_include_directories(tst_mobakeygen PRIVATE
-    ${PROJECT_SOURCE_DIR}/src/moba
 )
 
 target_link_libraries(tst_mobakeygen PRIVATE
+    biaox_core
     Qt6::Core
     Qt6::CorePrivate
-    Qt6::Gui
-    Qt6::Qml
     Qt6::Test
 )
 
@@ -35,19 +29,12 @@ add_test(NAME tst_mobakeygen COMMAND tst_mobakeygen)
 
 qt_add_executable(tst_filehasher
     tst_filehasher.cpp
-    ${PROJECT_SOURCE_DIR}/src/hash/filehasher.cpp
-    ${PROJECT_SOURCE_DIR}/src/hash/filehasher.hpp
-)
-
-target_include_directories(tst_filehasher PRIVATE
-    ${PROJECT_SOURCE_DIR}/src/hash
 )
 
 target_link_libraries(tst_filehasher PRIVATE
+    biaox_core
     Qt6::Core
     Qt6::Concurrent
-    Qt6::Gui
-    Qt6::Qml
     Qt6::Test
 )
 

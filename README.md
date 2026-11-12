@@ -14,11 +14,11 @@ UI 使用项目内的**黑橙扁平设计系统**：Qt Quick Controls 的 **Basi
 
 ## 环境要求
 
-- Qt 6.10 或更新版本（当前在 **Qt 6.12.0** 上构建验证）
+- Qt 6.10 或更新版本（开发环境在 **Qt 6.12.0** 上构建验证；CI 在 **Qt 6.10.3** 上验证最低版本）
 - CMake 3.21 或更新版本
 - C++17 编译器
 - Qt 模块：Core、Gui、Qml、Quick、QuickControls2、QuickDialogs2、Concurrent、Test（仅测试需要）
-- `QZipWriter` 使用的 QtCore 私有头文件；CMake 通过 `Qt6::CorePrivate` 引入，配置阶段出现私有模块警告是预期行为
+- 应用本体不依赖 QtCore 私有 API；测试目标用 `QZipReader`（`Qt6::CorePrivate`）作独立校验 oracle
 - `QtConcurrent` 用于在后台线程计算文件哈希
 
 ## 构建和运行
@@ -186,9 +186,9 @@ dialogOpen: myDialog.visible
 | `Theme.success` | `#69F0AE` | 成功状态 |
 | `Theme.overlay` | `#B3000000` | 70% 黑色遮罩 |
 
-字号阶梯：32（欢迎页标题）、24（占位页/对话框强调）、18（顶栏标题）、16（区块标题/导航标题）、15（正文/输入/按钮）、14（标签/状态）、13（路径/提示）。正文使用平台默认字体族，不硬编码字体，保证中文回退。
+字号阶梯：32（欢迎页标题）、24（占位页/对话框强调）、18（顶栏标题/对话框正文标题）、16（区块标题/导航标题）、15（正文/输入/按钮）、14（标签/状态）、13（路径/提示）。正文使用平台默认字体族，不硬编码字体，保证中文回退。
 
-尺寸：顶栏 56、输入/按钮 36、图标按钮 40、圆角 4、页面左右内边距 24、工具页最大内容宽 820、抽屉 300、对话框最大宽 480。
+尺寸：顶栏 56、输入/按钮 36、图标按钮 40、圆角 4（96px 品牌 logo 用 `radiusLg` 8）、页面左右内边距 24、工具页最大内容宽 820、抽屉 300、对话框最大宽 480。
 
 ### 组件
 
@@ -204,37 +204,47 @@ dialogOpen: myDialog.visible
 | `AppMenu` | 暗色菜单，40px 行高，hover 橙字 |
 | `AppDialog` | 暗色对话框，4px 圆角、1px 描边、自定义底部按钮 |
 | `AppSection` | 平面区块：15px 标题 + 1px 分隔线 + 内容 |
-| `AppNavItem` | 抽屉导航项，56px，hover/选中橙条 |
+| `AppNavItem` | 抽屉导航项，56px，hover/选中橙条，左内边距 24 与抽屉头部/页脚同基线 |
 | `AppStatus` | 状态行，`severity: "info" \| "success" \| "warning" \| "error"`（成功绿、警告橙、错误红） |
-| `AppScrollBar` | 6px 细滚动条，内容溢出时显示 |
+| `AppScrollBar` | 6px 细滚动条，内容溢出时显示，手柄距容器内容右缘统一内缩 4px |
+| `HashRow` | 文件哈希页的单行哈希结果：算法名 + 匹配徽标 + 只读值 + 复制按钮 |
 
 ### 使用约定
 
 - 每个页面只放一个主操作按钮（`variant: "primary"`）；其余操作使用 `secondary`。
 - 错误用 `AppStatus` 的 `error`（红），提示/文件名警告用 `warning`（橙），校验通过用 `success`（绿），普通信息用 `info`。
-- 文件哈希页的拖拽面板使用 1px 描边和 4px 圆角，拖入有效文件时描边变橙，无效拖拽变红；不新增卡片或阴影。
-- 整个 UI 只使用 **0 或 4px 圆角**；不要新增胶囊按钮、卡片阴影、水波纹、缩放弹层等 Material 语言。应用图标本身是品牌资产，是唯一例外。
+- 文件哈希页的拖拽面板用 `surface` 底 + 弱描边（`border`）与输入框（`input` 底 + `borderStrong`）区分，1px 描边、4px 圆角；拖入有效文件时描边变橙，无效拖拽变红；不新增卡片或阴影。
+- 整个 UI 只使用 **0 或 4px 圆角**（96px 品牌 logo 除外，用 `radiusLg`）；不要新增胶囊按钮、卡片阴影、水波纹、缩放弹层等 Material 语言。应用图标本身是品牌资产，是唯一例外。
 - 不再使用 Material Style。不要在页面中 `import QtQuick.Controls.Material`，也不要写 `Material.*` 附加属性。
 - 平面区块用 `AppSection` 的标题 + 分隔线分组，不要把 Material `Frame` 当成卡片使用。
+- 菜单里的分组分隔线用 `AppMenu` 的 `dividerBeforeText` 指定（Qt 6.12 中 `MenuSeparator` 与自定义 delegate 不兼容，不要直接使用）。
 - 系统 `FileDialog` 和 OS 窗口标题栏/边框由平台绘制，是仅有的非自绘表面：桌面环境通常跟随系统主题；在无桌面/裸 X 环境下文件对话框可能回退为浅色 Qt 对话框，这是预期例外。
 - 目前只提供深色主题，没有运行时主题切换或浅色主题。
+
+### 验收红线（改 UI 后自查）
+
+1. **对比度**：正文（textPrimary）≥ 7:1、次要文字（textSecondary/textMuted）≥ 4.5:1；禁用态用 `Theme.textDisabled`（在 #000 上约 4.1:1），不得回退到更暗的自定义灰。
+2. **基线**：抽屉、页面内容、对话框统一 24px 左基线；不新增自定义缩进。
+3. **选中态**：列表/下拉的"当前选中"必须用 `Theme.selectedOverlay`（品牌橙 12%），`Theme.hoverOverlay` 只用于 hover；两者同时成立时选中态优先。
+4. **滚动条**：一律用 `AppScrollBar`，手柄距容器内容右缘 4px；浮层内缩 = 浮层 padding + 滚动条内缩，不要写自定义位置。
+5. **首屏可用**：新增/修改工具页后，在默认 960×640 与最小 720×480 两种尺寸下检查主流程入口首屏可见（可滚动，但不能被折叠线藏住）。
 
 ## 项目结构
 
 ```text
 Biaox/
-├── CMakeLists.txt
+├── CMakeLists.txt             # biaox 主程序 + biaox_core 静态库 + QML 模块
 ├── src/
-│   ├── main.cpp              # Basic style + 启动暗色 palette
-│   ├── hash/                 # 文件哈希后端（QtConcurrent）
-│   └── moba/                 # 从 mobaXkeygen 复制的后端
+│   ├── main.cpp               # Basic style + 防白闪底色
+│   ├── hash/                  # 文件哈希后端（QtConcurrent），编入 biaox_core
+│   └── moba/                  # 从 mobaXkeygen 复制的后端，编入 biaox_core
 ├── qml/
 │   ├── Main.qml              # header + Drawer + StackView + 菜单/关于
 │   ├── Theme.qml             # 设计 token（Singleton）
 │   ├── ToolCatalog.qml       # 工具列表（Singleton）
 │   ├── WelcomePage.qml
 │   ├── ScrollablePage.qml
-│   ├── components/           # BiaoxPage + App* 统一控件
+│   ├── components/           # BiaoxPage + App* 统一控件 + HashRow
 │   └── pages/
 │       ├── FileHashPage.qml
 │       ├── MobaXtermKeygenPage.qml
@@ -247,9 +257,10 @@ Biaox/
 ## 实现说明和限制
 
 - 所有 QML 页面和 C++ `MobaKeygen`、`FileHasher` 注册在同一个 QML 模块 `Biaox` 中，入口使用 `engine.loadFromModule("Biaox", "Main")`。
+- 后端（hash/moba）编译为 `biaox_core` 静态库，主程序与测试共享同一份编译产物；QML 模块挂在静态库上，应用通过 whole-archive 链接保留类型注册。
 - 文件哈希在 `QtConcurrent` 后台线程中分块计算，三种算法共用一次文件读取；页面不提供进度和取消 UI，离开页面时会取消后台任务。
-- `QZipWriter` / `QZipReader` 是 QtCore 私有 API。当前 Qt 6.12 可用；如果以后更换 Qt 版本导致私有头变化，只需调整 `src/moba/mxtprowriter.cpp` 和测试中的读取部分。
-- `main.cpp` 明确设置为 Qt Quick Controls 的 **Basic** style，并设置启动暗色 palette；UI 的颜色/结构由 `Theme.qml` 和 `App*` 组件提供。
+- `.mxtpro` 由自包含的 STORE 模式 ZIP 写入器生成（`src/moba/mxtprowriter.cpp`，无第三方与私有 API）；测试用 `QZipReader` 独立校验结构与内容。
+- `main.cpp` 明确设置为 Qt Quick Controls 的 **Basic** style，只设置防白闪的窗口底色；运行期调色板单一来源是 `Theme.qml`（在 `Main.qml` 中绑定到 ApplicationWindow）。
 - 菜单/返回/更多图标仍是黑色 PNG，通过 `icon.color` 绑定到 `Theme`：默认白色，hover/focus 橙色。应用图标 `qrc:/icons/biaox/app.png` 同时用于欢迎页和抽屉。
 - 抽屉只在欢迎页可交互滑出；进入工具页后通过左上角返回按钮回到欢迎页，与 Gallery 的默认行为一致。
 - 当前没有实现运行时样式切换、深浅色切换或横向固定抽屉。

@@ -47,7 +47,6 @@ BiaoxPage {
             Layout.alignment: Qt.AlignHCenter
             Layout.topMargin: Theme.spaceSm
             Layout.preferredWidth: 180
-            implicitHeight: 40
             text: qsTr("打开工具箱")
             variant: "primary"
             onClicked: page.openToolsRequested()

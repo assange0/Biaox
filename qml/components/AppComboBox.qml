@@ -100,8 +100,10 @@ ComboBox {
         palette.highlightedText: Theme.brand
 
         background: Rectangle {
-            color: optionItem.highlighted ? Theme.hoverOverlay
-                : control.currentIndex === optionItem.index ? Theme.selectedOverlay
+            // 当前选中项用品牌橙 12% overlay，hover 高亮用中性 overlay；
+            // 两者同时成立时选中态优先，避免选中项看起来只是 hover。
+            color: control.currentIndex === optionItem.index ? Theme.selectedOverlay
+                : optionItem.highlighted ? Theme.hoverOverlay
                 : "transparent"
 
             Rectangle {
@@ -122,10 +124,11 @@ ComboBox {
         font: control.font
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
-        // Keep the popup inside the 720x480 minimum window: 6 rows plus
-        // padding, with a scroll bar for longer version lists.
+        // Keep the popup inside the 720x480 minimum window: viewport at most
+        // 6 rows (240px), plus the popup's own padding so the last row is
+        // never clipped; longer version lists scroll.
         height: Math.max(Theme.controlHeight,
-            Math.min(240, contentItem.implicitHeight + topPadding + bottomPadding))
+            Math.min(240, contentItem.implicitHeight) + topPadding + bottomPadding)
 
         contentItem: ListView {
             implicitHeight: contentHeight

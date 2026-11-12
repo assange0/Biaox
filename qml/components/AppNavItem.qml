@@ -13,8 +13,9 @@ ItemDelegate {
     implicitHeight: Theme.navItemHeight
     hoverEnabled: true
     padding: 0
-    leftPadding: 20
-    rightPadding: 16
+    // 与抽屉头部/页脚的 Theme.spaceXl(24) 共用同一左基线
+    leftPadding: Theme.spaceXl
+    rightPadding: Theme.spaceLg
     topPadding: 10
     bottomPadding: 10
     opacity: placeholder ? 0.55 : 1.0
