@@ -15,8 +15,8 @@ Button {
 
     readonly property color contentColor: !enabled ? Theme.textDisabled
         : primaryStyle ? Theme.brandForeground
-        : ghostStyle ? ((hoveredStyle || visualFocus) ? Theme.brandHover : Theme.brand)
-        : ((hoveredStyle || visualFocus) ? Theme.brand : Theme.textPrimary)
+        : ghostStyle ? ((hoveredStyle || visualFocus) ? Theme.accentTextHover : Theme.accentText)
+        : ((hoveredStyle || visualFocus) ? Theme.accentText : Theme.textPrimary)
 
     readonly property color baseColor: primaryStyle
         ? (!enabled ? Theme.surfaceAlt : pressedStyle ? Theme.brandPressed : hoveredStyle ? Theme.brandHover : Theme.brand)
@@ -24,7 +24,7 @@ Button {
 
     // 禁用态保留弱描边，兼顾"不可点"信号与按钮可识别性（文字对比度见 textDisabled）
     readonly property color borderColor: !enabled ? Theme.border
-        : visualFocus ? (primaryStyle ? Theme.textPrimary : Theme.brand)
+        : visualFocus ? (primaryStyle ? Theme.textPrimary : Theme.accentText)
         : primaryStyle ? "transparent"
         : ghostStyle ? "transparent"
         : Theme.borderStrong

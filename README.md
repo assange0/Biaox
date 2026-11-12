@@ -169,26 +169,31 @@ dialogOpen: myDialog.visible
 
 所有颜色、字号、间距和控件尺寸集中在 `qml/Theme.qml`（`pragma Singleton`）。页面和组件中不要再写颜色/字号字面量。
 
-核心色板：
+主题三选一：`Theme.scheme = "system" | "dark" | "light"`（默认 `system`，通过 `Theme.setScheme()` 修改，持久化到 QSettings 的 `appearance/theme`）。`system` 跟随 `Qt.styleHints.colorScheme`；X11/无 portal 环境返回 Unknown 时回退深色。`Theme.darkMode` 是各 token 的切换开关，组件只读 token、不读 darkMode。
 
-| Token | 值 | 用途 |
-|---|---|---|
-| `Theme.brand` | `#FF9900` | 品牌色、主按钮、focus、选中态 |
-| `Theme.brandHover` / `brandPressed` | `#FFAD33` / `#E68A00` | 主按钮状态 |
-| `Theme.canvas` / `header` | `#000000` | 窗口、顶栏、页面底色 |
-| `Theme.drawer` | `#0A0A0A` | 抽屉 |
-| `Theme.surface` / `surfaceAlt` | `#121212` / `#1A1A1A` | 弹层、对话框、hover 层 |
-| `Theme.input` | `#0F0F0F` | 输入框底色 |
-| `Theme.border` / `borderStrong` | `#2A2A2A` / `#5A5A5A` | 分隔线 / 交互描边 |
-| `Theme.textPrimary` / `textSecondary` / `textMuted` | `#FFFFFF` / `#A6A6A6` / `#8A8A8A` | 文字层级 |
-| `Theme.warning` | `#FFB74D` | 警告状态 |
-| `Theme.danger` | `#FF5C5C` | 错误状态 |
-| `Theme.success` | `#69F0AE` | 成功状态 |
-| `Theme.overlay` | `#B3000000` | 70% 黑色遮罩 |
+核心色板（深色 / 浅色）：
+
+| Token | 深色值 | 浅色值 | 用途 |
+|---|---|---|---|
+| `Theme.brand` | `#FF9900` | `#FF9900` | 品牌色、主按钮填充、选中条（浅色主题下橙字改用 accentText） |
+| `Theme.brandHover` / `brandPressed` | `#FFAD33` / `#E68A00` | 同左 | 主按钮状态 |
+| `Theme.accentText` / `accentTextHover` | `#FF9900` / `#FFAD33` | `#9A5500` / `#7A4400` | **橙色作为文字/焦点描边**时的颜色（浅底对比度 ≥ 4.5:1） |
+| `Theme.canvas` / `header` | `#000000` | `#FAFAFA` | 窗口、顶栏、页面底色 |
+| `Theme.drawer` | `#0A0A0A` | `#F0F0F0` | 抽屉（与画布保持一层差） |
+| `Theme.surface` / `surfaceAlt` | `#121212` / `#1A1A1A` | `#FFFFFF` / `#F0F0F0` | 弹层、对话框、hover 层 |
+| `Theme.input` | `#0F0F0F` | `#FFFFFF` | 输入框底色 |
+| `Theme.border` / `borderStrong` | `#2A2A2A` / `#5A5A5A` | `#E0E0E0` / `#B0B0B0` | 分隔线 / 交互描边 |
+| `Theme.textPrimary` / `textSecondary` / `textMuted` | `#FFFFFF` / `#A6A6A6` / `#8A8A8A` | `#1A1A1A` / `#595959` / `#6E6E6E` | 文字层级 |
+| `Theme.warning` | `#FFB74D` | `#9A6200` | 警告状态 |
+| `Theme.danger` | `#FF5C5C` | `#C62828` | 错误状态 |
+| `Theme.success` | `#69F0AE` | `#1E7D4F` | 成功状态 |
+| `Theme.overlay` | `#B3000000` | `#B3000000` | 70% 黑色遮罩（两主题共用） |
 
 字号阶梯：32（欢迎页标题）、24（占位页/对话框强调）、18（顶栏标题/对话框正文标题）、16（区块标题/导航标题）、15（正文/输入/按钮）、14（标签/状态）、13（路径/提示）。正文使用平台默认字体族，不硬编码字体，保证中文回退。
 
 尺寸：顶栏 56、输入/按钮 36、图标按钮 40、圆角 4（96px 品牌 logo 用 `radiusLg` 8）、页面左右内边距 24、工具页最大内容宽 820、抽屉 300、对话框最大宽 480。
+
+主题切换入口在顶栏"更多选项"菜单：跟随系统 / 深色 / 浅色三选一（`checkable` + 勾选标记），改动立即生效并持久化；`main.cpp` 启动时按已保存的偏好设置防白闪底色。
 
 ### 组件
 
@@ -212,6 +217,7 @@ dialogOpen: myDialog.visible
 ### 使用约定
 
 - 每个页面只放一个主操作按钮（`variant: "primary"`）；其余操作使用 `secondary`。
+- **橙色的两种用法**：填充（主按钮底、选中条、拖拽反馈描边）用 `Theme.brand`；文字与焦点描边用 `Theme.accentText`（浅色主题下加深以保证对比度）。新增橙色用法时先分清属于哪一类。
 - 错误用 `AppStatus` 的 `error`（红），提示/文件名警告用 `warning`（橙），校验通过用 `success`（绿），普通信息用 `info`。
 - 文件哈希页的拖拽面板用 `surface` 底 + 弱描边（`border`）与输入框（`input` 底 + `borderStrong`）区分，1px 描边、4px 圆角；拖入有效文件时描边变橙，无效拖拽变红；不新增卡片或阴影。
 - 整个 UI 只使用 **0 或 4px 圆角**（96px 品牌 logo 除外，用 `radiusLg`）；不要新增胶囊按钮、卡片阴影、水波纹、缩放弹层等 Material 语言。应用图标本身是品牌资产，是唯一例外。
@@ -219,11 +225,11 @@ dialogOpen: myDialog.visible
 - 平面区块用 `AppSection` 的标题 + 分隔线分组，不要把 Material `Frame` 当成卡片使用。
 - 菜单里的分组分隔线用 `AppMenu` 的 `dividerBeforeText` 指定（Qt 6.12 中 `MenuSeparator` 与自定义 delegate 不兼容，不要直接使用）。
 - 系统 `FileDialog` 和 OS 窗口标题栏/边框由平台绘制，是仅有的非自绘表面：桌面环境通常跟随系统主题；在无桌面/裸 X 环境下文件对话框可能回退为浅色 Qt 对话框，这是预期例外。
-- 目前只提供深色主题，没有运行时主题切换或浅色主题。
+- 主题跟随系统配色（`Qt.styleHints.colorScheme`，Qt 6.8+）；Wayland/KDE 等环境会自动报告深浅色，X11 无 portal 时回退深色。
 
 ### 验收红线（改 UI 后自查）
 
-1. **对比度**：正文（textPrimary）≥ 7:1、次要文字（textSecondary/textMuted）≥ 4.5:1；禁用态用 `Theme.textDisabled`（在 #000 上约 4.1:1），不得回退到更暗的自定义灰。
+1. **对比度**：两种主题下正文（textPrimary）≥ 7:1、次要文字（textSecondary/textMuted/accentText）≥ 4.5:1；禁用态用 `Theme.textDisabled`（深色在 #000 上约 4.1:1），不得回退到更暗的自定义灰。
 2. **基线**：抽屉、页面内容、对话框统一 24px 左基线；不新增自定义缩进。
 3. **选中态**：列表/下拉的"当前选中"必须用 `Theme.selectedOverlay`（品牌橙 12%），`Theme.hoverOverlay` 只用于 hover；两者同时成立时选中态优先。
 4. **滚动条**：一律用 `AppScrollBar`，手柄距容器内容右缘 4px；浮层内缩 = 浮层 padding + 滚动条内缩，不要写自定义位置。

@@ -121,9 +121,13 @@ QString appConfigDirectory()
     if (!override.isEmpty())
         return override;
 
-    QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
-    if (path.isEmpty())
-        path = QDir::homePath() + QStringLiteral("/.mobaXterm-keygen");
+    // 固定使用 ~/.config/Biaox/，不随 organizationName 变化（AppConfigLocation
+    // 会因设置了组织名而变成 ~/.config/Biaox/Biaox/，破坏既有文件的位置约定）。
+    QString path = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+    if (!path.isEmpty())
+        path += QStringLiteral("/Biaox");
+    else
+        path = QDir::homePath() + QStringLiteral("/.config/Biaox");
     return path;
 }
 

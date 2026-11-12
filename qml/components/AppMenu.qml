@@ -9,25 +9,27 @@ Menu {
     padding: Theme.spaceXs
     overlap: 0
 
-    // 在这个文本的菜单项上方画一条分隔线（用于"退出"这类终止性动作）。
+    // 在这些文本的菜单项上方各画一条分隔线（用于"退出"这类终止性动作）。
     // MenuSeparator 与自定义 delegate 不兼容（Qt 6.12 实测不渲染），
     // 所以用显式属性实现。
-    property string dividerBeforeText: ""
+    property var dividerBeforeTexts: []
 
     delegate: MenuItem {
         id: menuItem
 
         implicitHeight: Theme.menuItemHeight
-        leftPadding: Theme.spaceMd
+        // Basic 风格下 checkable 项为 indicator 预留 24+6=30px；不可勾选项
+        // 补同样的左内边距，让所有项的文本左缘对齐。
+        leftPadding: Theme.spaceMd + (menuItem.checkable ? 0 : 30)
         rightPadding: Theme.spaceMd
         topPadding: 0
         bottomPadding: 0
         font.pixelSize: Theme.fontBody
 
         palette.text: Theme.textPrimary
-        palette.windowText: menuItem.highlighted && menuItem.enabled ? Theme.brand : Theme.textPrimary
+        palette.windowText: menuItem.highlighted && menuItem.enabled ? Theme.accentText : Theme.textPrimary
         palette.buttonText: Theme.textPrimary
-        palette.highlightedText: Theme.brand
+        palette.highlightedText: Theme.accentText
 
         background: Rectangle {
             color: menuItem.highlighted && menuItem.enabled ? Theme.surfaceAlt : "transparent"
@@ -39,7 +41,7 @@ Menu {
                 anchors.top: parent.top
                 height: 1
                 color: Theme.border
-                visible: menuItem.text === control.dividerBeforeText
+                visible: control.dividerBeforeTexts.indexOf(menuItem.text) !== -1
             }
         }
     }

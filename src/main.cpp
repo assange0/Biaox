@@ -9,7 +9,9 @@
 #include <QQmlEngine>
 #include <QQmlError>
 #include <QQuickStyle>
+#include <QSettings>
 #include <QStringList>
+#include <QStyleHints>
 #include <QTranslator>
 #include <QUrl>
 
@@ -18,15 +20,23 @@
 int main(int argc, char *argv[])
 {
     QCoreApplication::setApplicationName(QStringLiteral("Biaox"));
+    QCoreApplication::setOrganizationName(QStringLiteral("Biaox"));
     QCoreApplication::setApplicationVersion(QStringLiteral("0.1.0"));
 
     QGuiApplication app(argc, argv);
 
-    // 启动防白闪：QML 场景就绪前先把窗口底色设为黑色。
-    // 运行期调色板单一来源是 qml/Theme.qml 的 token（在 qml/Main.qml 中绑定到
-    // ApplicationWindow.palette），这里不再重复维护整套颜色。
+    // 启动防白闪：按持久化的主题偏好设置窗口底色（默认跟随系统配色；无 portal
+    // 环境 colorScheme 为 Unknown 时回退深色）。QML 场景就绪后运行期颜色全部
+    // 由 qml/Theme.qml 的 token 接管（在 qml/Main.qml 中绑定到 ApplicationWindow）。
+    const QSettings settings;
+    const QString theme = settings.value(QStringLiteral("appearance/theme"),
+                                         QStringLiteral("system")).toString();
+    const bool lightTheme = theme == QLatin1String("light")
+        || (theme == QLatin1String("system")
+            && app.styleHints()->colorScheme() == Qt::ColorScheme::Light);
     QPalette palette = app.palette();
-    palette.setColor(QPalette::Window, QColor(0x00, 0x00, 0x00));
+    palette.setColor(QPalette::Window,
+                     lightTheme ? QColor(0xFA, 0xFA, 0xFA) : QColor(0x00, 0x00, 0x00));
     app.setPalette(palette);
 
     // Translate Qt's own dialog/standard-button strings into the system locale.

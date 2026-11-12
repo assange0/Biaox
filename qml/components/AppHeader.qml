@@ -47,7 +47,7 @@ ToolBar {
             Layout.fillWidth: true
             Layout.leftMargin: Theme.spaceXs
             text: control.brandMode ? "Biaox" : control.title
-            color: control.brandMode ? Theme.brand : Theme.textPrimary
+            color: control.brandMode ? Theme.accentText : Theme.textPrimary
             font.pixelSize: control.brandMode ? Theme.fontBrand : Theme.fontHeader
             font.weight: control.brandMode ? Theme.fontWeightBold : Theme.fontWeightDemiBold
             font.letterSpacing: control.brandMode ? 0.5 : 0

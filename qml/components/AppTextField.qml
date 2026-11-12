@@ -30,7 +30,7 @@ TextField {
         color: Theme.input
         border.width: control.activeFocus ? 2 : 1
         border.color: !control.enabled ? Theme.border
-            : control.activeFocus ? Theme.brand
+            : control.activeFocus ? Theme.accentText
             : Theme.borderStrong
     }
 }

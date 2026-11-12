@@ -75,11 +75,32 @@ ApplicationWindow {
         // 右缘与顶栏菜单按钮右缘对齐（按钮右侧距窗口 8px），顶部紧贴 header 底边。
         x: window.width - Theme.spaceSm - width
         y: 0
-        dividerBeforeText: qsTr("退出")
+        dividerBeforeTexts: [qsTr("主题：跟随系统"), qsTr("退出")]
 
         Action {
             text: qsTr("关于 Biaox")
             onTriggered: aboutDialog.open()
+        }
+
+        Action {
+            text: qsTr("主题：跟随系统")
+            checkable: true
+            checked: Theme.scheme === "system"
+            onTriggered: Theme.setScheme("system")
+        }
+
+        Action {
+            text: qsTr("主题：深色")
+            checkable: true
+            checked: Theme.scheme === "dark"
+            onTriggered: Theme.setScheme("dark")
+        }
+
+        Action {
+            text: qsTr("主题：浅色")
+            checkable: true
+            checked: Theme.scheme === "light"
+            onTriggered: Theme.setScheme("light")
         }
 
         Action {
@@ -138,7 +159,7 @@ ApplicationWindow {
                     Label {
                         Layout.fillWidth: true
                         text: "Biaox"
-                        color: Theme.brand
+                        color: Theme.accentText
                         font.pixelSize: Theme.fontBrand
                         font.weight: Theme.fontWeightBold
                         font.letterSpacing: 0.5

@@ -47,7 +47,7 @@ ComboBox {
         Canvas {
             anchors.fill: parent
             property color strokeColor: !control.enabled ? Theme.textDisabled
-                : (control.popup && control.popup.visible) || control.hovered || control.focused ? Theme.brand
+                : (control.popup && control.popup.visible) || control.hovered || control.focused ? Theme.accentText
                 : Theme.textSecondary
 
             onStrokeColorChanged: requestPaint()
@@ -76,7 +76,7 @@ ComboBox {
         color: Theme.input
         border.width: control.focused ? 2 : 1
         border.color: !control.enabled ? Theme.border
-            : control.focused ? Theme.brand
+            : control.focused ? Theme.accentText
             : Theme.borderStrong
     }
 
@@ -96,8 +96,8 @@ ComboBox {
         text: model[control.textRole]
         highlighted: control.highlightedIndex === optionItem.index
 
-        palette.text: control.currentIndex === optionItem.index ? Theme.brand : Theme.textPrimary
-        palette.highlightedText: Theme.brand
+        palette.text: control.currentIndex === optionItem.index ? Theme.accentText : Theme.textPrimary
+        palette.highlightedText: Theme.accentText
 
         background: Rectangle {
             // 当前选中项用品牌橙 12% overlay，hover 高亮用中性 overlay；

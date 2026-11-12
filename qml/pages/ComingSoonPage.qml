@@ -21,12 +21,12 @@ BiaoxPage {
             radius: Theme.radius
             color: "transparent"
             border.width: 1
-            border.color: Theme.brand
+            border.color: Theme.accentText
 
             Label {
                 anchors.centerIn: parent
                 text: "+"
-                color: Theme.brand
+                color: Theme.accentText
                 font.pixelSize: 36
             }
         }

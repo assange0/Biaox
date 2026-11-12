@@ -27,7 +27,7 @@ ItemDelegate {
         Label {
             Layout.fillWidth: true
             text: control.headline
-            color: control.highlighted || control.hovered ? Theme.brand : Theme.textPrimary
+            color: control.highlighted || control.hovered ? Theme.accentText : Theme.textPrimary
             font.pixelSize: Theme.fontSection
             font.weight: Theme.fontWeightMedium
             elide: Label.ElideRight

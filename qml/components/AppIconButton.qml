@@ -15,7 +15,7 @@ ToolButton {
     icon.width: 24
     icon.height: 24
     icon.color: !enabled ? Theme.textDisabled
-        : (hovered || visualFocus) ? Theme.brand
+        : (hovered || visualFocus) ? Theme.accentText
         : Theme.textPrimary
 
     background: Rectangle {
@@ -26,7 +26,7 @@ ToolButton {
             : (control.down || control.hovered || control.visualFocus) ? Theme.hoverOverlay
             : "transparent"
         border.width: control.visualFocus ? 2 : 0
-        border.color: Theme.brand
+        border.color: Theme.accentText
 
         Behavior on color {
             ColorAnimation { duration: Theme.motionFast }
