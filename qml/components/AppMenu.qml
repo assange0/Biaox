@@ -9,6 +9,11 @@ Menu {
     padding: Theme.spaceXs
     overlap: 0
 
+    // 在这个文本的菜单项上方画一条分隔线（用于"退出"这类终止性动作）。
+    // MenuSeparator 与自定义 delegate 不兼容（Qt 6.12 实测不渲染），
+    // 所以用显式属性实现。
+    property string dividerBeforeText: ""
+
     delegate: MenuItem {
         id: menuItem
 
@@ -27,6 +32,15 @@ Menu {
         background: Rectangle {
             color: menuItem.highlighted && menuItem.enabled ? Theme.surfaceAlt : "transparent"
             radius: 2
+
+            Rectangle {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                height: 1
+                color: Theme.border
+                visible: menuItem.text === control.dividerBeforeText
+            }
         }
     }
 

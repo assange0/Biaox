@@ -72,10 +72,10 @@ ApplicationWindow {
 
     AppMenu {
         id: optionsMenu
-        x: window.width - width - Theme.spaceMd
-        // ApplicationWindow's popup coordinates start below the header, so this
-        // places the menu directly under the header's menu button.
-        y: Theme.spaceXs
+        // 右缘与顶栏菜单按钮右缘对齐（按钮右侧距窗口 8px），顶部紧贴 header 底边。
+        x: window.width - Theme.spaceSm - width
+        y: 0
+        dividerBeforeText: qsTr("退出")
 
         Action {
             text: qsTr("关于 Biaox")
@@ -227,8 +227,10 @@ ApplicationWindow {
     AppDialog {
         id: aboutDialog
         title: qsTr("关于 Biaox")
-        x: Math.round((window.width - width) / 2)
-        y: Math.round((window.height - height) / 2)
+        // Popup 坐标空间从 header 之下的 contentItem 开始，用 contentItem 的
+        // 尺寸居中（旧实现用 window.height，多算了 56px header 导致整体偏低）。
+        x: Math.round((window.contentItem.width - width) / 2)
+        y: Math.round((window.contentItem.height - height) / 2)
         width: Math.min(window.width - 48, Theme.dialogMaxWidth)
         confirmText: qsTr("确定")
 
@@ -240,7 +242,7 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 text: qsTr("Biaox %1").arg(Qt.application.version)
                 color: Theme.textPrimary
-                font.pixelSize: Theme.fontHero
+                font.pixelSize: Theme.fontHeader
                 font.weight: Theme.fontWeightBold
             }
 
@@ -254,7 +256,8 @@ ApplicationWindow {
 
             Label {
                 Layout.fillWidth: true
-                text: qsTr("MobaXterm 是商业软件。本工具仅供学习研究，请通过官方渠道购买正版授权。")
+                Layout.topMargin: Theme.spaceSm
+                text: qsTr("MobaXterm 是商业软件。本工具仅供学习研究，请通过官方渠道购买正版授权，请勿用于商业用途。")
                 color: Theme.textSecondary
                 font.pixelSize: Theme.fontLabel
                 wrapMode: Text.WordWrap
@@ -262,6 +265,7 @@ ApplicationWindow {
 
             Label {
                 Layout.fillWidth: true
+                Layout.topMargin: Theme.spaceSm
                 text: qsTr("部分界面结构和图标来自 Qt Quick Controls Gallery（BSD-3-Clause）。")
                 color: Theme.textMuted
                 font.pixelSize: Theme.fontCaption

@@ -7,7 +7,8 @@ ScrollBar {
 
     policy: ScrollBar.AsNeeded
     minimumSize: 0.08
-    padding: 1
+    // 统一内缩：手柄距所在容器的内容右缘 4px（浮层另有自身 padding）。
+    padding: 4
     interactive: true
     hoverEnabled: true
 

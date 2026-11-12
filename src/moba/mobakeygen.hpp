@@ -17,6 +17,7 @@ class MobaKeygen : public QObject
     Q_PROPERTY(QString lastSavedPath READ lastSavedPath NOTIFY lastSavedPathChanged)
     Q_PROPERTY(QUrl defaultOutputUrl READ defaultOutputUrl CONSTANT)
     Q_PROPERTY(QString versionsFilePath READ versionsFilePath CONSTANT)
+    Q_PROPERTY(QString versionsFilePathDisplay READ versionsFilePathDisplay CONSTANT)
 
 public:
     explicit MobaKeygen(QObject *parent = nullptr);
@@ -31,6 +32,7 @@ public:
     QString lastSavedPath() const;
     QUrl defaultOutputUrl() const;
     QString versionsFilePath() const;
+    QString versionsFilePathDisplay() const;
 
     void setUserName(const QString &userName);
     void setVersion(const QString &version);

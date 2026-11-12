@@ -99,7 +99,7 @@ ScrollablePage {
 
     ColumnLayout {
         width: parent.width
-        spacing: Theme.spaceXl
+        spacing: Theme.spaceMd
 
         Label {
             Layout.fillWidth: true
@@ -116,7 +116,7 @@ ScrollablePage {
             DropArea {
                 id: fileDrop
                 Layout.fillWidth: true
-                implicitHeight: fileContent.implicitHeight + Theme.spaceLg * 2
+                implicitHeight: fileContent.implicitHeight + Theme.spaceXs * 2
                 enabled: !hasher.busy
 
                 // The visual drop target uses the existing flat surfaces. Reset
@@ -126,9 +126,11 @@ ScrollablePage {
                 Rectangle {
                     anchors.fill: parent
                     radius: Theme.radius
-                    color: fileDrop.containsDrag ? Theme.selectedOverlay : Theme.input
+                    // 用 surface 底 + 弱描边与输入框(input + borderStrong)区分，
+                    // 避免拖放区看起来像"第四个输入框"。
+                    color: fileDrop.containsDrag ? Theme.selectedOverlay : Theme.surface
                     border.width: 1
-                    border.color: !fileDrop.containsDrag ? Theme.borderStrong
+                    border.color: !fileDrop.containsDrag ? Theme.border
                         : fileDrop.validDrag ? Theme.brand
                         : Theme.danger
                 }
@@ -136,13 +138,13 @@ ScrollablePage {
                 ColumnLayout {
                     id: fileContent
                     anchors.fill: parent
-                    anchors.margins: Theme.spaceLg
+                    anchors.margins: Theme.spaceXs
                     spacing: Theme.spaceMd
 
                     ColumnLayout {
                         Layout.fillWidth: true
                         visible: !hasher.hasFile
-                        spacing: Theme.spaceSm
+                        spacing: Theme.spaceXs
 
                         Label {
                             Layout.fillWidth: true
@@ -189,7 +191,7 @@ ScrollablePage {
                     ColumnLayout {
                         Layout.fillWidth: true
                         visible: hasher.hasFile
-                        spacing: Theme.spaceSm
+                        spacing: Theme.spaceXs
 
                         RowLayout {
                             Layout.fillWidth: true
@@ -297,153 +299,30 @@ ScrollablePage {
 
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: Theme.spaceLg
+                spacing: Theme.spaceMd
 
-                ColumnLayout {
+                HashRow {
                     Layout.fillWidth: true
-                    spacing: Theme.spaceSm
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: Theme.spaceSm
-
-                        Label {
-                            text: "MD5"
-                            color: hasher.matchedAlgorithm === "MD5"
-                                ? Theme.success
-                                : Theme.textSecondary
-                            font.pixelSize: Theme.fontLabel
-                            font.weight: Theme.fontWeightMedium
-                        }
-
-                        Label {
-                            visible: hasher.matchedAlgorithm === "MD5"
-                            text: qsTr("匹配")
-                            color: Theme.success
-                            font.pixelSize: Theme.fontCaption
-                            font.weight: Theme.fontWeightMedium
-                        }
-
-                        Item {
-                            Layout.fillWidth: true
-                        }
-
-                        AppButton {
-                            Layout.preferredWidth: 72
-                            text: qsTr("复制")
-                            variant: "secondary"
-                            enabled: hasher.md5.length > 0
-                            Accessible.name: qsTr("复制 MD5 哈希值")
-                            onClicked: page.copyHash("MD5", hasher.md5)
-                        }
-                    }
-
-                    AppTextField {
-                        Layout.fillWidth: true
-                        readOnly: true
-                        text: hasher.md5
-                        placeholderText: qsTr("计算后显示")
-                        font.pixelSize: Theme.fontLabel
-                        Accessible.name: qsTr("MD5 哈希值")
-                    }
+                    algorithm: "MD5"
+                    value: hasher.md5
+                    matched: hasher.matchedAlgorithm === "MD5"
+                    onCopyRequested: (algorithm, value) => page.copyHash(algorithm, value)
                 }
 
-                ColumnLayout {
+                HashRow {
                     Layout.fillWidth: true
-                    spacing: Theme.spaceSm
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: Theme.spaceSm
-
-                        Label {
-                            text: "SHA-1"
-                            color: hasher.matchedAlgorithm === "SHA-1"
-                                ? Theme.success
-                                : Theme.textSecondary
-                            font.pixelSize: Theme.fontLabel
-                            font.weight: Theme.fontWeightMedium
-                        }
-
-                        Label {
-                            visible: hasher.matchedAlgorithm === "SHA-1"
-                            text: qsTr("匹配")
-                            color: Theme.success
-                            font.pixelSize: Theme.fontCaption
-                            font.weight: Theme.fontWeightMedium
-                        }
-
-                        Item {
-                            Layout.fillWidth: true
-                        }
-
-                        AppButton {
-                            Layout.preferredWidth: 72
-                            text: qsTr("复制")
-                            variant: "secondary"
-                            enabled: hasher.sha1.length > 0
-                            Accessible.name: qsTr("复制 SHA-1 哈希值")
-                            onClicked: page.copyHash("SHA-1", hasher.sha1)
-                        }
-                    }
-
-                    AppTextField {
-                        Layout.fillWidth: true
-                        readOnly: true
-                        text: hasher.sha1
-                        placeholderText: qsTr("计算后显示")
-                        font.pixelSize: Theme.fontLabel
-                        Accessible.name: qsTr("SHA-1 哈希值")
-                    }
+                    algorithm: "SHA-1"
+                    value: hasher.sha1
+                    matched: hasher.matchedAlgorithm === "SHA-1"
+                    onCopyRequested: (algorithm, value) => page.copyHash(algorithm, value)
                 }
 
-                ColumnLayout {
+                HashRow {
                     Layout.fillWidth: true
-                    spacing: Theme.spaceSm
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: Theme.spaceSm
-
-                        Label {
-                            text: "SHA-256"
-                            color: hasher.matchedAlgorithm === "SHA-256"
-                                ? Theme.success
-                                : Theme.textSecondary
-                            font.pixelSize: Theme.fontLabel
-                            font.weight: Theme.fontWeightMedium
-                        }
-
-                        Label {
-                            visible: hasher.matchedAlgorithm === "SHA-256"
-                            text: qsTr("匹配")
-                            color: Theme.success
-                            font.pixelSize: Theme.fontCaption
-                            font.weight: Theme.fontWeightMedium
-                        }
-
-                        Item {
-                            Layout.fillWidth: true
-                        }
-
-                        AppButton {
-                            Layout.preferredWidth: 72
-                            text: qsTr("复制")
-                            variant: "secondary"
-                            enabled: hasher.sha256.length > 0
-                            Accessible.name: qsTr("复制 SHA-256 哈希值")
-                            onClicked: page.copyHash("SHA-256", hasher.sha256)
-                        }
-                    }
-
-                    AppTextField {
-                        Layout.fillWidth: true
-                        readOnly: true
-                        text: hasher.sha256
-                        placeholderText: qsTr("计算后显示")
-                        font.pixelSize: Theme.fontLabel
-                        Accessible.name: qsTr("SHA-256 哈希值")
-                    }
+                    algorithm: "SHA-256"
+                    value: hasher.sha256
+                    matched: hasher.matchedAlgorithm === "SHA-256"
+                    onCopyRequested: (algorithm, value) => page.copyHash(algorithm, value)
                 }
 
                 Label {
@@ -464,17 +343,9 @@ ScrollablePage {
             AppTextField {
                 id: expectedField
                 Layout.fillWidth: true
-                placeholderText: qsTr("粘贴 MD5 / SHA-1 / SHA-256")
+                placeholderText: qsTr("粘贴 MD5 / SHA-1 / SHA-256，自动识别算法与常见格式")
                 Accessible.name: qsTr("预期哈希值")
                 onTextEdited: hasher.expectedHash = text
-            }
-
-            Label {
-                Layout.fillWidth: true
-                text: qsTr("自动识别算法，忽略大小写；支持算法前缀、文件名后缀和分组书写等常见格式。")
-                color: Theme.textMuted
-                font.pixelSize: Theme.fontCaption
-                wrapMode: Text.WordWrap
             }
 
             AppStatus {

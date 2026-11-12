@@ -26,7 +26,8 @@ QtObject {
     readonly property color textPrimary: "#FFFFFF"
     readonly property color textSecondary: "#A6A6A6"
     readonly property color textMuted: "#8A8A8A"
-    readonly property color textDisabled: "#5C5C5C"
+    // 禁用文字在 #000 上约 4.1:1（旧值 #5C5C5C 仅 ~2.9:1，验收红线）
+    readonly property color textDisabled: "#6E6E6E"
 
     // Semantic / state
     readonly property color warning: "#FFB74D"
@@ -63,6 +64,8 @@ QtObject {
     readonly property int menuItemHeight: 40
     readonly property int navItemHeight: 56
     readonly property int radius: 4
+    // 大尺寸品牌资产（96px 欢迎页 logo）的圆角；小图标仍用 radius
+    readonly property int radiusLg: 8
 
     readonly property int spaceXs: 4
     readonly property int spaceSm: 8

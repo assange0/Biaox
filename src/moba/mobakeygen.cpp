@@ -185,6 +185,15 @@ QString MobaKeygen::versionsFilePath() const
     return m_versionsFilePath;
 }
 
+QString MobaKeygen::versionsFilePathDisplay() const
+{
+    // UI 显示用：把用户主目录替换为 ~，避免在界面暴露绝对路径。
+    const QString home = QDir::homePath();
+    if (!home.isEmpty() && m_versionsFilePath.startsWith(home))
+        return QLatin1Char('~') + m_versionsFilePath.mid(home.size());
+    return m_versionsFilePath;
+}
+
 void MobaKeygen::setUserName(const QString &userName)
 {
     if (m_userName == userName)

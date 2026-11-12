@@ -83,6 +83,7 @@ qt_add_qml_module(biaox
         qml/components/AppStatus.qml
         qml/components/AppTextField.qml
         qml/components/BiaoxPage.qml
+        qml/components/HashRow.qml
         qml/pages/FileHashPage.qml
         qml/pages/MobaXtermKeygenPage.qml
         qml/pages/ComingSoonPage.qml
