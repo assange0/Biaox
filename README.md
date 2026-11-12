@@ -14,11 +14,11 @@ UI 使用项目内的**黑橙扁平设计系统**：Qt Quick Controls 的 **Basi
 
 ## 环境要求
 
-- Qt 6.10 或更新版本（当前在 **Qt 6.12.0** 上构建验证）
+- Qt 6.10 或更新版本（开发环境在 **Qt 6.12.0** 上构建验证；CI 在 **Qt 6.10.3** 上验证最低版本）
 - CMake 3.21 或更新版本
 - C++17 编译器
 - Qt 模块：Core、Gui、Qml、Quick、QuickControls2、QuickDialogs2、Concurrent、Test（仅测试需要）
-- `QZipWriter` 使用的 QtCore 私有头文件；CMake 通过 `Qt6::CorePrivate` 引入，配置阶段出现私有模块警告是预期行为
+- 应用本体不依赖 QtCore 私有 API；测试目标用 `QZipReader`（`Qt6::CorePrivate`）作独立校验 oracle
 - `QtConcurrent` 用于在后台线程计算文件哈希
 
 ## 构建和运行
@@ -233,11 +233,11 @@ dialogOpen: myDialog.visible
 
 ```text
 Biaox/
-├── CMakeLists.txt
+├── CMakeLists.txt             # biaox 主程序 + biaox_core 静态库 + QML 模块
 ├── src/
-│   ├── main.cpp              # Basic style + 启动暗色 palette
-│   ├── hash/                 # 文件哈希后端（QtConcurrent）
-│   └── moba/                 # 从 mobaXkeygen 复制的后端
+│   ├── main.cpp               # Basic style + 防白闪底色
+│   ├── hash/                  # 文件哈希后端（QtConcurrent），编入 biaox_core
+│   └── moba/                  # 从 mobaXkeygen 复制的后端，编入 biaox_core
 ├── qml/
 │   ├── Main.qml              # header + Drawer + StackView + 菜单/关于
 │   ├── Theme.qml             # 设计 token（Singleton）
@@ -257,9 +257,10 @@ Biaox/
 ## 实现说明和限制
 
 - 所有 QML 页面和 C++ `MobaKeygen`、`FileHasher` 注册在同一个 QML 模块 `Biaox` 中，入口使用 `engine.loadFromModule("Biaox", "Main")`。
+- 后端（hash/moba）编译为 `biaox_core` 静态库，主程序与测试共享同一份编译产物；QML 模块挂在静态库上，应用通过 whole-archive 链接保留类型注册。
 - 文件哈希在 `QtConcurrent` 后台线程中分块计算，三种算法共用一次文件读取；页面不提供进度和取消 UI，离开页面时会取消后台任务。
-- `QZipWriter` / `QZipReader` 是 QtCore 私有 API。当前 Qt 6.12 可用；如果以后更换 Qt 版本导致私有头变化，只需调整 `src/moba/mxtprowriter.cpp` 和测试中的读取部分。
-- `main.cpp` 明确设置为 Qt Quick Controls 的 **Basic** style，并设置启动暗色 palette；UI 的颜色/结构由 `Theme.qml` 和 `App*` 组件提供。
+- `.mxtpro` 由自包含的 STORE 模式 ZIP 写入器生成（`src/moba/mxtprowriter.cpp`，无第三方与私有 API）；测试用 `QZipReader` 独立校验结构与内容。
+- `main.cpp` 明确设置为 Qt Quick Controls 的 **Basic** style，只设置防白闪的窗口底色；运行期调色板单一来源是 `Theme.qml`（在 `Main.qml` 中绑定到 ApplicationWindow）。
 - 菜单/返回/更多图标仍是黑色 PNG，通过 `icon.color` 绑定到 `Theme`：默认白色，hover/focus 橙色。应用图标 `qrc:/icons/biaox/app.png` 同时用于欢迎页和抽屉。
 - 抽屉只在欢迎页可交互滑出；进入工具页后通过左上角返回按钮回到欢迎页，与 Gallery 的默认行为一致。
 - 当前没有实现运行时样式切换、深浅色切换或横向固定抽屉。

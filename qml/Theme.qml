@@ -2,8 +2,8 @@ pragma Singleton
 
 import QtQuick
 
-// Single source of truth for the Biaox look. Keep main.cpp's startup palette
-// in sync with the surface/text colors used here.
+// 单一颜色来源。运行期调色板由 qml/Main.qml 从这里派生；main.cpp 只设置
+// 启动防白闪的 Window 底色，不重复维护颜色。
 QtObject {
     // Brand
     readonly property color brand: "#FF9900"

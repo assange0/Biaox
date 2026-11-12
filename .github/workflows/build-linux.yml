@@ -1,0 +1,70 @@
+name: Build Linux
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:  # 支持手动触发
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.10.3'
+          host: linux
+          target: desktop
+          arch: linux_gcc_64
+          cache: true
+
+      - name: Configure
+        run: |
+          cmake -G Ninja -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: qmllint (zero warnings)
+        shell: bash
+        run: |
+          # Qt 把 qmllint 参数文件写在 QML 模块 target 旁边。
+          # 当前模块 target 是 biaox_core，因此文件名为 biaox_core_module.rsp；
+          # 若日后改名/删改，则回退到任意 *_module.rsp。
+          rsp="build/.rcc/qmllint/biaox_core_module.rsp"
+          if [ ! -f "$rsp" ]; then
+            rsp=$(ls build/.rcc/qmllint/*_module.rsp 2>/dev/null | head -n 1) || true
+          fi
+          if [ -z "$rsp" ] || [ ! -f "$rsp" ]; then
+            echo "::error::未找到 qmllint 参数文件 build/.rcc/qmllint/*_module.rsp"
+            ls -la build/.rcc/qmllint || true
+            exit 1
+          fi
+
+          echo "使用 $rsp 运行 qmllint"
+          # qmllint 即使有 warning/error 也可能返回 0，所以必须检查输出内容。
+          set +e
+          output=$("$QT_ROOT_DIR/bin/qmllint" "@$rsp" 2>&1)
+          status=$?
+          set -e
+
+          if [ -n "$output" ] || [ "$status" -ne 0 ]; then
+            printf '%s\n' "$output"
+            echo "::error::qmllint 报告了问题（退出码 $status）；本项目要求零 warning"
+            exit 1
+          fi
+          echo "qmllint: clean"
+
+      - name: Test
+        run: |
+          QT_QPA_PLATFORM=offscreen \
+          LD_LIBRARY_PATH="$QT_ROOT_DIR/lib" \
+          ctest --test-dir build --output-on-failure

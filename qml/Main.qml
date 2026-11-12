@@ -19,8 +19,8 @@ ApplicationWindow {
     color: Theme.canvas
     font.pixelSize: Theme.fontBody
 
-    // Keep Basic-style popups that are not wrapped by App* components (most
-    // notably the text-field context menu) on the dark palette as well.
+    // 运行期调色板单一来源：全部从 Theme token 派生（Basic-style 的原生弹层
+    // 如文本框右键菜单也走这里）。main.cpp 只负责启动防白闪的 Window 底色。
     palette.window: Theme.canvas
     palette.windowText: Theme.textPrimary
     palette.base: Theme.input
